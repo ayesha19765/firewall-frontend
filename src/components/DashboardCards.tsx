@@ -8,7 +8,7 @@ const DashboardCards = () => {
   const stats = getAgentStatistics(nodes);
 
   return (
-    <div style={{ height: '270px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', padding: '16px' }}>
+    <div className="bg-white rounded-lg shadow-md p-4 md:p-6 h-auto md:h-[270px]">
       <h3 className="text-lg font-semibold text-gray-700 mb-4">Dashboard Summary</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="flex flex-col">

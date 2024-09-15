@@ -1,4 +1,4 @@
-"use client"; // Ensure this file is a client component
+"use client";
 
 import React from "react";
 import { useRouter } from "next/navigation";
@@ -21,14 +21,14 @@ export default function NodesTable() {
       <table className="min-w-full bg-white border border-gray-200">
         <thead className="bg-gray-100">
           <tr>
-            <th className="px-4 py-2 border">Node ID</th>
-            <th className="px-4 py-2 border">Device Name</th>
-            <th className="px-4 py-2 border">IP Address</th>
-            <th className="px-4 py-2 border">Platform</th>
-            <th className="px-4 py-2 border">Status</th>
-            <th className="px-4 py-2 border">Last Ping</th>
-            <th className="px-4 py-2 border">Anomalies Detected</th>
-            <th className="px-4 py-2 border">Actions</th>
+            <th className="px-4 py-2 border text-left">Node ID</th>
+            <th className="px-4 py-2 border text-left">Device Name</th>
+            <th className="px-4 py-2 border text-left">IP Address</th>
+            <th className="px-4 py-2 border text-left">Platform</th>
+            <th className="px-4 py-2 border text-left">Status</th>
+            <th className="px-4 py-2 border text-left">Last Ping</th>
+            <th className="px-4 py-2 border text-left">Anomalies Detected</th>
+            <th className="px-4 py-2 border text-left">Actions</th>
           </tr>
         </thead>
         <tbody>

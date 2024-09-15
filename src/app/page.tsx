@@ -43,9 +43,8 @@ export default function Home() {
         </div>
 
         {/* Compact Summary Card */}
-        <div className="flex-1">
+        <div className="flex-1 ">
           <CardContent>
-            <p className="p-4 font-semibold">Summary</p>
             <DashboardCards /> {/* Use DashboardCards component to show summary data */}
           </CardContent>
         </div>
@@ -53,7 +52,6 @@ export default function Home() {
         {/* Line Chart */}
         <div className="flex-1">
           <CardContent>
-            <p className="p-4 font-semibold">Agent Activity</p>
             <LineChart />
           </CardContent>
         </div>
