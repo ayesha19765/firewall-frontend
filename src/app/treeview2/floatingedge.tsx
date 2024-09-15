@@ -1,20 +1,17 @@
 "use client"
-import { getBezierPath, useInternalNode } from '@xyflow/react';
-
+import React from 'react';
+import { getBezierPath, useInternalNode, EdgeProps } from '@xyflow/react';
 import { getEdgeParams } from './util';
 
-function FloatingEdge({ id, source, target, markerEnd, style }) {
-  const sourceNode = useInternalNode(source);
-  const targetNode = useInternalNode(target);
+const FloatingEdge: React.FC<EdgeProps> = ({ id, source, target, markerEnd, style }) => {
+  const sourceNode = useInternalNode(source) as any;
+  const targetNode = useInternalNode(target) as any;
 
   if (!sourceNode || !targetNode) {
     return null;
   }
 
-  const { sx, sy, tx, ty, sourcePos, targetPos } = getEdgeParams(
-    sourceNode,
-    targetNode,
-  );
+  const { sx, sy, tx, ty, sourcePos, targetPos } = getEdgeParams(sourceNode, targetNode);
 
   const [edgePath] = getBezierPath({
     sourceX: sx,
@@ -34,6 +31,6 @@ function FloatingEdge({ id, source, target, markerEnd, style }) {
       style={style}
     />
   );
-}
+};
 
 export default FloatingEdge;

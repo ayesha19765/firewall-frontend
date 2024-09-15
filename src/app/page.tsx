@@ -25,7 +25,7 @@ export default function Home() {
           <Card
             key={i}
             amount={d.amount}
-            description={d.description}
+            discription={d.discription}
             icon={d.icon}
             label={d.label}
           />
@@ -52,7 +52,8 @@ export default function Home() {
         {/* Line Chart */}
         <div className="flex-1">
           <CardContent>
-            <LineChart />
+            <p className="p-4 font-semibold">Agent Activity</p>
+            <LineChart  />
           </CardContent>
         </div>
       </section>

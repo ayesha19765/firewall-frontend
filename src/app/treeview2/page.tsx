@@ -8,6 +8,9 @@ import {
   useNodesState,
   useEdgesState,
   MarkerType,
+  Node,
+  Edge,
+  OnConnect,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -23,10 +26,11 @@ const edgeTypes = {
   floating: FloatingEdge,
 };
 
-const NodeAsHandleFlow = () => {
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const onConnect = useCallback(
+const NodeAsHandleFlow: React.FC = () => {
+  const [nodes, , onNodesChange] = useNodesState<Node>(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initialEdges);
+
+  const onConnect: OnConnect = useCallback(
     (params) =>
       setEdges((eds) =>
         addEdge(
