@@ -6,19 +6,12 @@ import Card, { CardContent, CardProps } from "@/components/Card";
 import AgentsTable from "@/components/AgentsTable";
 import DonutChart from "@/components/DonutChart";
 import LineChart from "@/components/LineChart";
+import DashboardCards from "@/components/DashboardCards"; // Import DashboardCards component
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const cardData: CardProps[] = [
   // Your card data here...
 ];
-
-const summaryData = {
-  activeAgents: 4,
-  lastRegisteredAgent: "Fedora",
-  disconnectedAgents: 1,
-  neverConnectedAgents: 1,
-  mostActiveAgent: "Fedora",
-  agentsCoverage: "57.14%",
-};
 
 export default function Home() {
   return (
@@ -53,32 +46,7 @@ export default function Home() {
         <div className="flex-1">
           <CardContent>
             <p className="p-4 font-semibold">Summary</p>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-gray-700 font-semibold">Active Agents</p>
-                <p className="text-lg">{summaryData.activeAgents}</p>
-              </div>
-              <div>
-                <p className="text-gray-700 font-semibold">Last Registered Agent</p>
-                <p className="text-lg">{summaryData.lastRegisteredAgent}</p>
-              </div>
-              <div>
-                <p className="text-gray-700 font-semibold">Disconnected</p>
-                <p className="text-lg">{summaryData.disconnectedAgents}</p>
-              </div>
-              <div>
-                <p className="text-gray-700 font-semibold">Never Connected</p>
-                <p className="text-lg">{summaryData.neverConnectedAgents}</p>
-              </div>
-              <div>
-                <p className="text-gray-700 font-semibold">Most Active Agent</p>
-                <p className="text-lg">{summaryData.mostActiveAgent}</p>
-              </div>
-              <div>
-                <p className="text-gray-700 font-semibold">Agents Coverage</p>
-                <p className="text-lg">{summaryData.agentsCoverage}</p>
-              </div>
-            </div>
+            <DashboardCards /> {/* Use DashboardCards component to show summary data */}
           </CardContent>
         </div>
 

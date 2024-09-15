@@ -2,20 +2,22 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image'; // Import Image component for optimized image loading
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // New state for toggling password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState('user'); // New state for role selection
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic
-    console.log('Logging in with', email, password);
+    // Handle login logic based on the role
+    console.log('Logging in as', role, 'with', email, password);
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
+    <div className="flex justify-center items-center p-8 h-screen bg-gray-100">
       <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg">
         <div className="flex justify-center mb-6">
           <div className="bg-blue-500 p-4 rounded-full">
@@ -36,11 +38,36 @@ const Login: React.FC = () => {
               required
             />
           </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2">Role</label>
+            <div className="flex space-x-4">
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  value="user"
+                  checked={role === 'user'}
+                  onChange={() => setRole('user')}
+                  className="form-radio text-blue-500"
+                />
+                <span className="ml-2">User</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  value="admin"
+                  checked={role === 'admin'}
+                  onChange={() => setRole('admin')}
+                  className="form-radio text-blue-500"
+                />
+                <span className="ml-2">Admin</span>
+              </label>
+            </div>
+          </div>
           <div className="mb-6">
             <label className="block text-gray-700 text-sm font-bold mb-2">Password</label>
             <div className="relative">
               <input
-                type={showPassword ? 'text' : 'password'} // Toggle between text and password input type
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
@@ -49,10 +76,15 @@ const Login: React.FC = () => {
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-3 flex items-center text-gray-500"
-                onClick={() => setShowPassword((prev) => !prev)} // Toggle showPassword state
+                className="absolute inset-y-0 right-3 flex items-center"
+                onClick={() => setShowPassword((prev) => !prev)}
               >
-                {showPassword ? '🙈' : '👁️'} {/* Toggle between eye and hidden-eye icon */}
+                <Image
+                  src={showPassword ? '/eye.png' : '/hidden.png'}
+                  alt={showPassword ? 'Hide password' : 'Show password'}
+                  width={20}
+                  height={20}
+                />
               </button>
             </div>
           </div>

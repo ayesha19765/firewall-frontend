@@ -1,41 +1,32 @@
-type Agent = {
-  id: number;
-  name: string;
-  ip: string;
-  group: string;
-  os: string;
-  cluster: string;
-  version: string;
-  registrationDate: string;
-  lastKeepAlive: string;
-  status: string;
-};
+// utils/agentStats.ts
+import { Node } from "@/types"; // Adjust path as needed
 
-export function getAgentStatistics(agents: Agent[]) {
-  const totalAgents = agents.length;
-  
-  const activeCount = agents.filter(agent => agent.status === 'active').length;
-  const disconnectedCount = agents.filter(agent => agent.status === 'disconnected').length;
-  const neverConnectedCount = agents.filter(agent => agent.status === 'never connected').length;
+export function getAgentStatistics(nodes: Node[]) {
+  const activeCount = nodes.filter((node) => node.status === "active").length;
+  const disconnectedCount = nodes.filter((node) => node.status === "disconnected").length;
+  const neverConnectedCount = nodes.filter((node) => node.status === "never connected").length;
 
-  const mostActiveAgent = agents.reduce((latest, agent) => {
-    const lastKeepAliveDate = new Date(agent.lastKeepAlive);
-    return lastKeepAliveDate > new Date(latest.lastKeepAlive) ? agent : latest;
-  }, agents[0]);
+  // Get the agent that registered most recently
+  const mostRecentRegistrationAgent = nodes.reduce((latest, node) => {
+    if (!node.lastPing) return latest;
+    return !latest || new Date(node.lastPing) > new Date(latest.lastPing) ? node : latest;
+  }, null as Node | null);
 
-  const mostRecentRegistrationAgent = agents.reduce((latest, agent) => {
-    const registrationDate = new Date(agent.registrationDate);
-    return registrationDate > new Date(latest.registrationDate) ? agent : latest;
-  }, agents[0]);
+  // Calculate the most active agent based on some criteria (lastPing in this case)
+  const mostActiveAgent = nodes.reduce((mostActive, node) => {
+    if (!node.lastPing) return mostActive;
+    return !mostActive || new Date(node.lastPing) > new Date(mostActive.lastPing) ? node : mostActive;
+  }, null as Node | null);
 
-  const coveragePercentage = ((activeCount / totalAgents) * 100).toFixed(2) + '%';
+  const totalAgents = nodes.length;
+  const coveragePercentage = ((activeCount / totalAgents) * 100).toFixed(2);
 
   return {
     activeCount,
     disconnectedCount,
     neverConnectedCount,
-    mostActiveAgent: mostActiveAgent.name,
-    mostRecentRegistrationAgent: mostRecentRegistrationAgent.name,
+    mostRecentRegistrationAgent,
+    mostActiveAgent,
     coveragePercentage,
   };
 }

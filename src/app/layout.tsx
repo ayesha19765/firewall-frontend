@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "../lib/utils";
-import SideNavbar from "@/components/SideNavbar";
+import ClientOnlySidebar from "@/components/ClientOnlySidebar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,18 +22,17 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={cn(
-          "min-h-screen w-full bg-white text-black flex ",
+          "min-h-screen w-full bg-white text-black flex",
           inter.className,
           {
             "debug-screens": process.env.NODE_ENV === "development"
           }
         )}
       >
-        {/* sidebar */}
-        {/* <p className="border">Sidebar</p> */}
-        <SideNavbar />
+        {/* Conditionally render sidebar */}
+        <ClientOnlySidebar />
         {/* main page */}
-        <div className="p-8 w-full">{children}</div>
+        <div className="w-full">{children}</div>
       </body>
     </html>
   );

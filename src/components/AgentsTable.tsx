@@ -2,49 +2,18 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { EyeIcon, CogIcon } from "@heroicons/react/24/solid"; // Ensure heroicons is installed
-
-export interface Node {
-  id: number;
-  deviceName: string;
-  ip: string;
-  platform: string;
-  status: string;
-  lastPing: string;
-  anomaliesDetected: string;
-}
-
-const nodes: Node[] = [
-  {
-    id: 1,
-    deviceName: "Device 1",
-    ip: "192.168.1.1",
-    platform: "Linux",
-    status: "active",
-    lastPing: "2024-09-13 12:34:56",
-    anomaliesDetected: "Yes",
-  },
-  {
-    id: 2,
-    deviceName: "Device 2",
-    ip: "192.168.1.2",
-    platform: "Windows",
-    status: "inactive",
-    lastPing: "2024-09-12 10:20:30",
-    anomaliesDetected: "No",
-  },
-  // Add more nodes as needed
-];
+import { EyeIcon, CogIcon } from "@heroicons/react/24/solid";
+import { nodes } from "../data/nodesData"; // Import the nodes data
 
 export default function NodesTable() {
   const router = useRouter(); // Initialize the router
 
-  const handleViewPolicy = (id: number) => {
-    router.push(`/orders`); // Navigate to the View Policies page
+  const navigateToPolicy = () => {
+    router.push(`/policy`); // Navigate to the Policy page
   };
 
-  const handleAddPolicy = (id: number) => {
-    router.push(`/settings`); // Navigate to the Add Policy page
+  const navigateToLog = () => {
+    router.push(`/log`); // Navigate to the Log page
   };
 
   return (
@@ -59,7 +28,7 @@ export default function NodesTable() {
             <th className="px-4 py-2 border">Status</th>
             <th className="px-4 py-2 border">Last Ping</th>
             <th className="px-4 py-2 border">Anomalies Detected</th>
-            <th className="px-4 py-2 border">Actions</th> {/* Added Actions header */}
+            <th className="px-4 py-2 border">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -85,10 +54,10 @@ export default function NodesTable() {
               <td className="px-4 py-2 border">{node.lastPing}</td>
               <td className="px-4 py-2 border">{node.anomaliesDetected}</td>
               <td className="px-4 py-2 border">
-                <button onClick={() => handleViewPolicy(node.id)} title="View Policies">
+                <button onClick={navigateToPolicy} title="View Policies">
                   <EyeIcon className="h-5 w-5 text-blue-500" />
                 </button>
-                <button onClick={() => handleAddPolicy(node.id)} title="Add Policy">
+                <button onClick={navigateToLog} title="Add Policy">
                   <CogIcon className="h-5 w-5 text-gray-500" />
                 </button>
               </td>

@@ -14,7 +14,9 @@ import {
   TimeScale,
 } from "chart.js";
 import "chartjs-adapter-date-fns"; // Use date-fns adapter for time parsing
+import { nodes } from "../data/nodesData"; // Import nodes data
 
+// Register chart components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -23,9 +25,10 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  TimeScale // Register the time scale for time-based data on x-axis
+  TimeScale
 );
 
+// LineChartProps Interface
 interface LineChartProps {
   data: {
     timestamps: string[];
@@ -35,19 +38,38 @@ interface LineChartProps {
   };
 }
 
-const LineChart: React.FC<LineChartProps> = ({ data }) => {
-  // Log data to check if it's being passed correctly
-  console.log("LineChart data:", data);
+// Function to process the nodes data into time-series format
+const processNodesData = (nodes: any[]) => {
+  // Define a function to get counts based on status
+  const countByStatus = (status: string) => nodes.filter(node => node.status === status).length;
 
-  // Provide fallback data if props are missing or invalid
-  const defaultData = {
-    timestamps: ["2024-09-14T08:00:00", "2024-09-14T09:00:00", "2024-09-14T10:00:00"],
-    activeCounts: [10, 12, 14],
-    disconnectedCounts: [5, 3, 2],
-    neverConnectedCounts: [1, 1, 0],
+  // Define the current time (or the latest available time)
+  const currentTime = new Date().toISOString();
+  
+  // Generate time series data
+  return {
+    timestamps: [
+      currentTime, // This example uses the current time. You should extend this to multiple time points.
+    ],
+    activeCounts: [countByStatus("active")],
+    disconnectedCounts: [countByStatus("disconnected")],
+    neverConnectedCounts: [countByStatus("never connected")],
   };
+};
 
-  const validData = data && data.timestamps?.length ? data : defaultData;
+const LineChart: React.FC<LineChartProps> = ({ data }) => {
+  console.log("LineChart received data:", data);
+
+  // Process nodes data into chart data format
+  const chartDataFromNodes = processNodesData(nodes);
+
+  const validData = data && data.timestamps?.length ? data : chartDataFromNodes;
+
+  // Check if there's any valid data to show
+  if (validData.timestamps.length === 0) {
+    console.warn("No valid timestamps in the data to display.");
+    return <div>No data available to display.</div>;
+  }
 
   const chartData = {
     labels: validData.timestamps,
@@ -117,9 +139,11 @@ const LineChart: React.FC<LineChartProps> = ({ data }) => {
   };
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-6">
-      <h3 className="text-lg font-semibold text-gray-700">Agent Status Over Time</h3>
-      <Line data={chartData} options={options} />
+    <div style={{ height: '270px', width: '100%' }}>
+      <div style={{ height: '100%' }}>
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">Agent Status Over Time</h3>
+        <Line data={chartData} options={options} />
+      </div>
     </div>
   );
 };
