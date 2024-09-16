@@ -1,34 +1,58 @@
 "use client";
 
 import { useState } from 'react';
+import { useUserStore } from '../../lib/store/userStore';
+import { useRouter } from 'next/navigation';  // Import useRouter hook
 import Link from 'next/link';
-import Image from 'next/image'; // Import Image component for optimized image loading
+import Image from 'next/image';
 
 const Signup: React.FC = () => {
+  const router = useRouter();  // Initialize useRouter
+  const [username, setUsername] = useState('');  // New state for username
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState('user'); // New state for role selection
+  const [role, setRole] = useState('user');
 
-  const handleSignup = (e: React.FormEvent) => {
+  const registerUser = useUserStore((state) => state.registerUser);
+  const error = useUserStore((state) => state.error);
+  const isLoading = useUserStore((state) => state.isLoading);
+  
+
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle signup logic based on the role
-    console.log('Signing up as', role, 'with', email, password);
+    // Passing username to registerUser along with email, password, and role
+    await registerUser(username, email, password, role);
+
+    // Redirect to login page after successful signup if no error
+    if (!error) {
+      router.push('/login');
+    }
   };
 
   return (
     <div className="flex justify-center items-center p-4 sm:p-8 h-screen bg-gray-100">
       <div className="w-full max-w-md sm:max-w-sm bg-white p-4 sm:p-8 rounded-lg shadow-lg">
-        <div className="flex justify-center mb-4 sm:mb-6">
-          <div className="bg-blue-500 p-2 sm:p-4 rounded-full">
-            <span className="text-white text-lg sm:text-2xl font-bold">🔒</span>
-          </div>
-        </div>
+        {/* UI Components */}
         <h2 className="text-lg sm:text-2xl text-center font-bold text-gray-700 mb-2 sm:mb-4">
           Sign up for Cloud Console
         </h2>
 
         <form onSubmit={handleSignup}>
+          {/* Username Input */}
+          <div className="mb-2 sm:mb-4">
+            <label className="block text-gray-700 text-xs sm:text-sm font-bold mb-1 sm:mb-2">Username</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter your username"
+              className="w-full px-2 sm:px-3 py-1 sm:py-2 text-gray-700 border rounded-lg focus:outline-none focus:ring focus:border-blue-300"
+              required
+            />
+          </div>
+
+          {/* Email Input */}
           <div className="mb-2 sm:mb-4">
             <label className="block text-gray-700 text-xs sm:text-sm font-bold mb-1 sm:mb-2">Email</label>
             <input
@@ -40,6 +64,8 @@ const Signup: React.FC = () => {
               required
             />
           </div>
+
+          {/* Role Selection */}
           <div className="mb-2 sm:mb-4">
             <label className="block text-gray-700 text-xs sm:text-sm font-bold mb-1 sm:mb-2">Role</label>
             <div className="flex flex-wrap sm:gap-2 sm:space-x-4">
@@ -65,6 +91,8 @@ const Signup: React.FC = () => {
               </label>
             </div>
           </div>
+
+          {/* Password Input */}
           <div className="mb-4 sm:mb-6">
             <label className="block text-gray-700 text-xs sm:text-sm font-bold mb-1 sm:mb-2">Password</label>
             <div className="relative">
@@ -90,14 +118,20 @@ const Signup: React.FC = () => {
               </button>
             </div>
           </div>
+
+          {/* Signup Button */}
           <div className="flex justify-between items-center">
             <button
               type="submit"
               className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 text-xs sm:text-base"
+              disabled={isLoading}  // Disable button while loading
             >
-              Sign up
+              {isLoading ? 'Signing up...' : 'Sign up'}
             </button>
           </div>
+
+          {/* Error message */}
+          {error && <p className="text-red-500 mt-2">{error}</p>}
         </form>
 
         <div className="mt-4 text-center text-xs sm:text-sm">

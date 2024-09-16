@@ -20,7 +20,6 @@
     "@types/react-chartjs-2": "^2.0.2",
     "@types/react-router-dom": "^5.3.3",
     "@types/victory": "^33.1.5",
-   
     "@xyflow/react": "^12.3.0",
     "chart.js": "^4.4.4",
     "chartjs-adapter-date-fns": "^3.0.0",
@@ -40,7 +39,8 @@
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7",
     "victory": "^37.1.1",
-    "window-size": "^1.1.1"
+    "window-size": "^1.1.1",
+    "zustand": "^5.0.0-rc.2"
   },
   "devDependencies": {
     "@types/node": "^20",

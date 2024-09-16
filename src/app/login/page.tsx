@@ -1,19 +1,30 @@
 "use client";
 
 import { useState } from 'react';
+import { useUserStore } from '../../lib/store/userStore'; // Import the Zustand store
 import Link from 'next/link';
 import Image from 'next/image'; // Import Image component for optimized image loading
+import { useRouter } from 'next/navigation'; // Import useRouter for navigation
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState('user'); // New state for role selection
+  const loginUser = useUserStore((state) => state.loginUser);
+  const error = useUserStore((state) => state.error);
+  const isLoading = useUserStore((state) => state.isLoading);
+  const router = useRouter(); // Use router for navigation
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic based on the role
-    console.log('Logging in as', role, 'with', email, password);
+    // Handle login logic
+    await loginUser(email, password);
+
+    // Redirect to dashboard or homepage on successful login
+    if (!error) {
+      router.push('/'); // Change the path as needed
+    }
   };
 
   return (
@@ -38,6 +49,7 @@ const Login: React.FC = () => {
               required
             />
           </div>
+
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2">Role</label>
             <div className="flex space-x-4">
@@ -63,6 +75,7 @@ const Login: React.FC = () => {
               </label>
             </div>
           </div>
+
           <div className="mb-6">
             <label className="block text-gray-700 text-sm font-bold mb-2">Password</label>
             <div className="relative">
@@ -88,14 +101,19 @@ const Login: React.FC = () => {
               </button>
             </div>
           </div>
+
           <div className="flex justify-between items-center">
             <button
               type="submit"
               className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300"
+              disabled={isLoading} // Disable button while loading
             >
-              Log in
+              {isLoading ? 'Logging in...' : 'Log in'}
             </button>
           </div>
+
+          {/* Error message */}
+          {error && <p className="text-red-500 mt-2">{error}</p>}
         </form>
 
         <div className="mt-4 text-center">
@@ -105,7 +123,7 @@ const Login: React.FC = () => {
         </div>
 
         <div className="mt-4 text-center">
-        <span>Don&apos;t have an account?</span>{' '}
+          <span>Don&apos;t have an account?</span>{' '}
           <Link href="/signup" className="text-blue-500 hover:text-blue-700">
             Sign up
           </Link>
