@@ -1,6 +1,5 @@
 "use client";
 
-
 import { Position, MarkerType, Node, Edge } from '@xyflow/react';
 
 interface NodeInternals {
@@ -84,7 +83,6 @@ export function getEdgeParams(source: MeasuredNode, target: MeasuredNode) {
   };
 }
 
-
 // Function to create initial nodes and edges
 export function createNodesAndEdges(): { nodes: Node[]; edges: Edge[] } {
   const nodes: Node[] = [];
@@ -99,19 +97,33 @@ export function createNodesAndEdges(): { nodes: Node[]; edges: Edge[] } {
     style: { backgroundColor: '#FFD700', color: '#000' }, // Highlight Admin node
   });
 
-  // Create 8 user nodes and connect them to the admin node
+  // Create 10 user nodes with different statuses and connect them to the admin node
+  const nodeStatuses = ['active', 'inactive', 'disconnected'];
   for (let i = 0; i < 10; i++) {
+    const status = nodeStatuses[i % nodeStatuses.length];
     const degrees = i * (360 / 10);
     const radians = degrees * (Math.PI / 180);
     const x = 250 * Math.cos(radians) + center.x;
     const y = 250 * Math.sin(radians) + center.y;
 
-    // User firewall nodes
+    let nodeColor;
+    switch (status) {
+      case 'active':
+        nodeColor = '#87CEFA'; // Light Blue
+        break;
+      case 'inactive':
+        nodeColor = '#FF8042'; // Orange
+        break;
+      case 'disconnected':
+        nodeColor = '#FFBB28'; // Yellow
+        break;
+    }
+
     nodes.push({
       id: `node-${i}`,
-      data: { label: `Node ${i}` }, // Each user node
+      data: { label: `Node ${i} (${status})` }, // Each user node with status
       position: { x, y },
-      style: { backgroundColor: '#87CEFA', color: '#fff' }, // Style for nodes
+      style: { backgroundColor: nodeColor, color: '#fff' }, // Style for nodes based on status
     });
 
     // Connection (edges) from user nodes to admin node

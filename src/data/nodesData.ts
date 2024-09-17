@@ -10,24 +10,50 @@ export interface Node {
 
 const today = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-export const nodes: Node[] = [
+export const nodes = [
   {
-    id: 1,
+    id: "NODE001",
     deviceName: "Device 1",
     ip: "192.168.1.1",
     platform: "Linux",
     status: "active",
-    lastPing: "2024-09-13T12:34:56",
-    anomaliesDetected: "Yes",
+    lastPing: "2024-09-10 10:45:00",
+    anomaliesDetected: 2,
   },
   {
-    id: 2,
+    id: "NODE002",
     deviceName: "Device 2",
     ip: "192.168.1.2",
     platform: "Windows",
     status: "inactive",
-    lastPing: "2024-09-12T10:20:30",
-    anomaliesDetected: "No",
+    lastPing: "2024-09-10 11:00:00",
+    anomaliesDetected: 5,
   },
-  // Add more nodes as needed
+  {
+    id: "NODE003",
+    deviceName: "Device 3",
+    ip: "192.168.1.3",
+    platform: "Linux",
+    status: "disconnected",
+    lastPing: "2024-09-10 11:30:00",
+    anomaliesDetected: 0,
+  },
+  {
+    id: "NODE004",
+    deviceName: "Device 4",
+    ip: "192.168.1.4",
+    platform: "Linux",
+    status: "active",
+    lastPing: "2024-09-10 12:00:00",
+    anomaliesDetected: 1,
+  },
+  {
+    id: "NODE005",
+    deviceName: "Device 5",
+    ip: "192.168.1.5",
+    platform: "Windows",
+    status: "inactive",
+    lastPing: "2024-09-10 12:30:00",
+    anomaliesDetected: 3,
+  },
 ];
