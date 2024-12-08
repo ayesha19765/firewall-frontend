@@ -80,7 +80,7 @@ const DonutChart = () => (
 				justifyContent: "center",
 				alignItems: "center",
 			}}>
-			<div style={{ width: "80%", height: "80%" }}>
+			<div style={{ width: "70%", height: "70%" }}>
 				<Doughnut
 					data={data}
 					options={options}
