@@ -25,7 +25,7 @@ interface DataTableProps<TData, TValue> {
 	data: TData[];
 }
 
-export function DataTable<TData, TValue>({
+export default function DataTable<TData, TValue>({
 	columns,
 	data,
 }: DataTableProps<TData, TValue>) {
@@ -38,7 +38,7 @@ export function DataTable<TData, TValue>({
 
 	return (
 		<div>
-			<div className='rounded-md border text-xs'>
+			<div className='rounded-md border'>
 				<Table>
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
@@ -58,7 +58,7 @@ export function DataTable<TData, TValue>({
 							</TableRow>
 						))}
 					</TableHeader>
-					<TableBody className='text-sm'>
+					<TableBody>
 						{table.getRowModel().rows?.length ? (
 							table.getRowModel().rows.map((row) => (
 								<TableRow

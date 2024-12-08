@@ -3,7 +3,8 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { EyeIcon, CogIcon } from "@heroicons/react/24/solid";
-import { nodes } from "../data/nodesData"; // Import the nodes data
+import { alerts } from "../data/alertsData"; // Import the nodes data
+import { platform } from "os";
 
 export default function NodesTable() {
 	const router = useRouter(); // Initialize the router
@@ -16,60 +17,49 @@ export default function NodesTable() {
 		router.push(`/log`); // Navigate to the Log page
 	};
 
-	const navigateToHost = (node_id: any) => {
-		router.push(`host/${node_id}`);
-	};
-
 	return (
 		<div className='overflow-x-auto'>
 			<table className='min-w-full bg-white border border-gray-200'>
 				<thead className='bg-gray-100'>
 					<tr>
-						<th className='px-4 py-2 border text-left'>Node ID</th>
 						<th className='px-4 py-2 border text-left'>Device Name</th>
 						<th className='px-4 py-2 border text-left'>IP Address</th>
 						<th className='px-4 py-2 border text-left'>Platform</th>
 						<th className='px-4 py-2 border text-left'>Status</th>
-						<th className='px-4 py-2 border text-left'>Last Ping</th>
-						<th className='px-4 py-2 border text-left'>Anomalies Detected</th>
+						<th className='px-4 py-2 border text-left'>Recieved at</th>
+						<th className='px-4 py-2 border text-left'>Alert</th>
+						<th className='px-4 py-2 border text-left'>Description</th>
+						<th className='px-4 py-2 border text-left'>Read</th>
 					</tr>
 				</thead>
 				<tbody>
-					{nodes.map((node) => (
-						<tr
-							key={node.id}
-							onClick={() => navigateToHost(node.id)}
-							className='cursor-pointer'>
-							<td className='px-4 py-2 border'>{node.id}</td>
-							<td className='px-4 py-2 border'>{node.deviceName}</td>
-							<td className='px-4 py-2 border'>{node.ip}</td>
-							<td className='px-4 py-2 border'>{node.platform}</td>
+					{alerts.map((alert) => (
+						<tr key={alert.nodeid}>
+							<td className='px-4 py-2 border'>{alert.deviceName}</td>
+							<td className='px-4 py-2 border'>{alert.ip}</td>
+							<td className='px-4 py-2 border'>{alert.platform}</td>
 							<td className='px-4 py-2 border'>
 								<span
 									className={`${
-										node.status === "active"
+										alert.status === "active"
 											? "text-green-600"
-											: node.status === "inactive"
+											: alert.status === "inactive"
 											? "text-red-600"
 											: "text-yellow-600"
 									}`}>
-									{node.status}
+									{alert.status}
 								</span>
 							</td>
-							<td className='px-4 py-2 border'>{node.lastPing}</td>
-							<td className='px-4 py-2 border'>{node.anomaliesDetected}</td>
-							{/* <td className='px-4 py-2 border'>
+							<td className='px-4 py-2 border'>{alert.lastPing}</td>
+							<td className='px-4 py-2 border'>{alert.alert}</td>
+							<td className='px-4 py-2 border'>{alert.description}</td>
+							<td className='px-4 py-2 border'>
 								<button
 									onClick={navigateToPolicy}
 									title='View Policies'>
 									<EyeIcon className='h-5 w-5 text-blue-500' />
 								</button>
-								<button
-									onClick={navigateToLog}
-									title='Add Policy'>
-									<CogIcon className='h-5 w-5 text-gray-500' />
-								</button>
-							</td> */}
+							</td>
 						</tr>
 					))}
 				</tbody>
