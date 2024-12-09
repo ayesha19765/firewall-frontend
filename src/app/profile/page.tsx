@@ -1,3 +1,5 @@
+"use client";
+
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -8,6 +10,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useUserStore } from "@/lib/store/userStore";
 
 export default function AdminProfile() {
 	const adminInfo = {
@@ -15,6 +18,7 @@ export default function AdminProfile() {
 		email: "john.doe@example.com",
 		role: "Super Admin",
 	};
+	const admin = useUserStore((state) => state.user);
 
 	const activityData = [
 		{ action: "User Banned", ruleId: "R-001", time: "2023-06-01 14:30" },
@@ -35,13 +39,23 @@ export default function AdminProfile() {
 							</span>
 						</div>
 						<AvatarFallback className='text-6xl bg-gradient-to-r from-purple-400 to-pink-600'>
-							JD
+							MS
 						</AvatarFallback>
 					</Avatar>
 					<div className='text-center'>
-						<h2 className='text-2xl font-bold'>{adminInfo.name}</h2>
-						<p className='text-gray-500'>{adminInfo.email}</p>
-						<p className='text-gray-500'>{adminInfo.role}</p>
+						<h2 className='text-2xl font-bold'>{admin?.name}</h2>
+						<p className='text-gray-500'>{admin?.email || "email"}</p>
+						<p className='text-gray-500'>{admin?.adminID || "adminID"}</p>
+						<p>Clients :</p>
+						{admin?.clientID.map((element, index) => {
+							return (
+								<p
+									className='text-gray-500'
+									key={index}>
+									{element || "clientID"}
+								</p>
+							);
+						})}
 					</div>
 				</CardContent>
 			</Card>

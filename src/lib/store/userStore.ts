@@ -4,8 +4,9 @@ import { useToast } from "@/components/hooks/use-toast";
 interface User {
 	name: string;
 	email: string;
-	role: string;
 	password?: string;
+	adminID?: any;
+	clientID?: any;
 }
 
 interface UserState {
@@ -14,12 +15,11 @@ interface UserState {
 	isLoading: boolean;
 	registerUser: (
 		name: string,
-		email: string,
-		password: string,
-		role: string,
+		emaile: string,
+		passworde: string,
 		toast: any
 	) => Promise<void>;
-	loginUser: (email: string, password: string, toast: any) => Promise<void>;
+	loginUser: (emaile: string, passworde: string, toast: any) => Promise<void>;
 	logoutUser: () => void;
 }
 
@@ -28,26 +28,35 @@ export const useUserStore = create<UserState>((set) => ({
 	error: null,
 	isLoading: false,
 
-	registerUser: async (name, email, password, role, toast) => {
+	registerUser: async (name, emaile, passworde, toast) => {
 		set({ isLoading: true, error: null });
 
 		try {
-			const response = await axios.post("http://localhost:3000/auth/signup", {
+			const response = await axios.post("http://localhost:3000/admin/signup", {
 				name: name,
-				email: email,
-				password: password,
-				role: role,
+				email: emaile,
+				password: passworde,
 			});
 
+			console.log(response);
+
 			const {
-				name: user_name,
-				email: user_email,
-				role: user_role,
-			} = response?.data.user;
+				// name: user_name,
+				email: email,
+				password: password,
+				adminID: adminID,
+				clientID: clientID,
+			} = response?.data.admin;
 			const token = response?.data.token;
 			localStorage.setItem("csstoken", token);
 			set({
-				user: { name: user_name, email: user_email, role: user_role },
+				user: {
+					email: email,
+					adminID: adminID,
+					clientID: clientID,
+					password: password,
+					name: "",
+				},
 				error: null,
 			});
 
@@ -58,7 +67,7 @@ export const useUserStore = create<UserState>((set) => ({
 		} catch (error: any) {
 			console.log(error);
 			const errorMessage =
-				error.response?.data?.error || "An error occurred. Please try again.";
+				error.response?.data?.message || "An error occurred. Please try again.";
 			toast({
 				title: "Error",
 				description: errorMessage,
@@ -70,34 +79,35 @@ export const useUserStore = create<UserState>((set) => ({
 		}
 	},
 
-	loginUser: async (email, password, toast) => {
+	loginUser: async (emaile, passworde, toast) => {
 		set({ isLoading: true, error: null });
 
 		try {
-			const response = await axios.post("http://localhost:3000/auth/login", {
-				email: email,
-				password: password,
+			const response = await axios.post("http://localhost:3000/admin/signin", {
+				email: emaile,
+				password: passworde,
 			});
 
 			if (response.status == 200) {
-				const { name, email, role, token } = response.data;
-				localStorage.setItem("csstoken", token);
-				set({ user: { name, email, role }, error: null });
+				const { email, adminID, clientID } = response.data.admin;
+				// localStorage.setItem("csstoken", token);
+				set({ user: { email, adminID, clientID, name: "" }, error: null });
 				toast({
 					title: "Logged in successfully",
 					description: "User login successful.",
 				});
+				console.log(name, email, adminID, clientID);
 			} else {
-				set({ error: response.data.error });
+				set({ error: response.data.message });
 				toast({
-					title: response.data.error,
+					title: response.data.message,
 					description: "User registered error.",
 				});
 			}
 		} catch (error: any) {
 			set({ error: "An error occurred. Please try again." });
 			toast({
-				title: error?.response?.data?.error,
+				title: error?.response?.data?.message,
 				description: "Probelm while looging in",
 			});
 		} finally {

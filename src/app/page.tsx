@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import PageTitle from "@/components/PageTitle";
 import Card, { CardContent, CardProps } from "@/components/Card";
 import AgentsTable from "@/components/AgentsTable";
@@ -10,6 +10,8 @@ import LineChart from "@/components/LineChart";
 import DashboardCards from "@/components/DashboardCards"; // Import DashboardCards component
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import Map from "@/components/Map";
+import { useUserStore } from "@/lib/store/userStore";
+import axios from "axios";
 
 const cardData: CardProps[] = [
 	// Your card data here...
@@ -24,6 +26,42 @@ const coordinates = [
 const email = "admin@mail.com";
 
 export default function Home() {
+	const [clientData, setClientData] = useState();
+	const admin = useUserStore((state) => state.user);
+	console.log(admin);
+
+	useEffect(() => {
+		const func = async () => {
+			console.log(admin);
+			const clientDataArray = [];
+			for (let i = 0; i < admin?.clientID.length; i++) {
+				const element = admin?.clientID[i];
+				const a = await axios.post("http://localhost:3000/details/client", {
+					clientID: element,
+				});
+				if (a.data.error) {
+					const array = [];
+					array.push(element);
+					const a = await axios.post("http://localhost:3000/details/clients", {
+						clientIDS: array,
+					});
+					const date = new Date().toISOString();
+					const newData = { ...a.data.data[0], last_ping: date };
+					clientDataArray.push(newData);
+					console.log(newData);
+				} else {
+					const date = new Date().toISOString();
+					const newData = { ...a.data.data[0], last_ping: date };
+					clientDataArray.push(newData);
+					console.log(newData);
+				}
+			}
+			setClientData(clientDataArray);
+		};
+		func();
+		console.log(clientData);
+	}, [admin?.clientID]);
+
 	return (
 		<div className='flex flex-col gap-4 w-full text-sm'>
 			<div>Dashboard - {email}</div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUserStore } from "../../lib/store/userStore";
 import { useRouter } from "next/navigation"; // Import useRouter hook
 import Link from "next/link";
@@ -23,7 +23,7 @@ const Signup: React.FC = () => {
 	const handleSignup = async (e: React.FormEvent) => {
 		e.preventDefault();
 		// Passing username to registerUser along with email, password, and role
-		await registerUser(username, email, password, role, toast);
+		await registerUser(username, email, password, toast);
 
 		if (!error) {
 			router.push("/");

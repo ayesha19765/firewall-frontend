@@ -19,6 +19,7 @@ import OpenPorts from "@/components/OpenPorts";
 import DomainMapping from "@/components/DomainMapping";
 import ApplicationData from "@/components/ApplicationData";
 import Interfaces from "@/components/Interfaces";
+import { useParams } from "react-router-dom";
 interface ClientProps {
 	clientID: string;
 }
@@ -108,7 +109,8 @@ export default function PolicyPage({ params }: Params) {
 	const [interfaces, setInterfaces] = useState();
 	const [openPorts, setOpenPorts] = useState();
 	const [networkUsage, setNetworkUsage] = useState();
-	const clientID = "3b699cd7-2c43-4a02-8121-d859627d7a03"; // Access the host_id
+	// const clientID = "3b699cd7-2c43-4a02-8121-d859627d7a03"; // Access the host_id
+	const { clientID } = useParams();
 	// const { clientData, isLoading, error, fetchClientData } =
 	// 	useClientDataStore();
 	useEffect(() => {

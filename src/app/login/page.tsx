@@ -22,7 +22,7 @@ const Login: React.FC = () => {
 		// Handle login logic
 		await loginUser(email, password, toast);
 
-		// Redirect to dashboard or homepage on successful login
+		//Redirect to dashboard or homepage on successful login
 		if (!error) {
 			router.push("/"); // Change the path as needed
 		}

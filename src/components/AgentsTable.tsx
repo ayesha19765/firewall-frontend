@@ -4,8 +4,10 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { EyeIcon, CogIcon } from "@heroicons/react/24/solid";
 import { nodes } from "../data/nodesData"; // Import the nodes data
+import { useUserStore } from "@/lib/store/userStore";
 
 export default function NodesTable() {
+	const admin = useUserStore((state) => state.user);
 	const router = useRouter(); // Initialize the router
 
 	const navigateToPolicy = () => {
@@ -19,6 +21,8 @@ export default function NodesTable() {
 	const navigateToHost = (node_id: any) => {
 		router.push(`host/${node_id}`);
 	};
+
+	console.log(admin?.clientID);
 
 	return (
 		<div className='overflow-x-auto'>
@@ -35,12 +39,14 @@ export default function NodesTable() {
 					</tr>
 				</thead>
 				<tbody>
-					{nodes.map((node) => (
+					{nodes.map((node, index) => (
 						<tr
 							key={node.id}
 							onClick={() => navigateToHost(node.id)}
 							className='cursor-pointer'>
-							<td className='px-4 py-2 border'>{node.id}</td>
+							<td className='px-4 py-2 border'>
+								{admin?.clientID[index] || ""}
+							</td>
 							<td className='px-4 py-2 border'>{node.deviceName}</td>
 							<td className='px-4 py-2 border'>{node.ip}</td>
 							<td className='px-4 py-2 border'>{node.platform}</td>
