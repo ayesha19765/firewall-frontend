@@ -59,8 +59,10 @@ export default function Home() {
 			setClientData(clientDataArray);
 		};
 		func();
-		console.log(clientData);
 	}, [admin?.clientID]);
+	useEffect(() => {
+		console.log(clientData);
+	}, [clientData]);
 
 	return (
 		<div className='flex flex-col gap-4 w-full text-sm'>
@@ -123,7 +125,7 @@ export default function Home() {
 			<section className='w-[85vw] md:w-full'>
 				<CardContent>
 					<p className='p-4 font-semibold'>Overview</p>
-					<AgentsTable />
+					<AgentsTable clientData={clientData} />
 				</CardContent>
 			</section>
 			<section className='w-[85vw] md:w-full'>

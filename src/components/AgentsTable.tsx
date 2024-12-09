@@ -6,7 +6,7 @@ import { EyeIcon, CogIcon } from "@heroicons/react/24/solid";
 import { nodes } from "../data/nodesData"; // Import the nodes data
 import { useUserStore } from "@/lib/store/userStore";
 
-export default function NodesTable() {
+export default function NodesTable({ clientData }: any) {
 	const admin = useUserStore((state) => state.user);
 	const router = useRouter(); // Initialize the router
 
@@ -29,28 +29,28 @@ export default function NodesTable() {
 			<table className='min-w-full bg-white border border-gray-200'>
 				<thead className='bg-gray-100'>
 					<tr>
-						<th className='px-4 py-2 border text-left'>Node ID</th>
+						<th className='px-4 py-2 border text-left'>Client ID</th>
 						<th className='px-4 py-2 border text-left'>Device Name</th>
 						<th className='px-4 py-2 border text-left'>IP Address</th>
-						<th className='px-4 py-2 border text-left'>Platform</th>
-						<th className='px-4 py-2 border text-left'>Status</th>
-						<th className='px-4 py-2 border text-left'>Last Ping</th>
-						<th className='px-4 py-2 border text-left'>Anomalies Detected</th>
+						<th className='px-4 py-2 border text-left'>OS</th>
 					</tr>
 				</thead>
 				<tbody>
-					{nodes.map((node, index) => (
+					{clientData?.map((node, index) => (
 						<tr
-							key={node.id}
-							onClick={() => navigateToHost(node.id)}
+							key={index}
+							onClick={() => navigateToHost(node?.clientID)}
 							className='cursor-pointer'>
+							<td className='px-4 py-2 border'>{node?.clientID || ""}</td>
 							<td className='px-4 py-2 border'>
-								{admin?.clientID[index] || ""}
+								{node.device_info.deviceName}
 							</td>
-							<td className='px-4 py-2 border'>{node.deviceName}</td>
-							<td className='px-4 py-2 border'>{node.ip}</td>
-							<td className='px-4 py-2 border'>{node.platform}</td>
 							<td className='px-4 py-2 border'>
+								{node?.device_info?.public_ip}
+							</td>
+							<td className='px-4 py-2 border'>{node?.device_info?.os}</td>
+
+							{/* <td className='px-4 py-2 border'>
 								<span
 									className={`${
 										node.status === "active"
@@ -63,7 +63,7 @@ export default function NodesTable() {
 								</span>
 							</td>
 							<td className='px-4 py-2 border'>{node.lastPing}</td>
-							<td className='px-4 py-2 border'>{node.anomaliesDetected}</td>
+							<td className='px-4 py-2 border'>{node.anomaliesDetected}</td> */}
 							{/* <td className='px-4 py-2 border'>
 								<button
 									onClick={navigateToPolicy}

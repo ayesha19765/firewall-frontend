@@ -125,6 +125,8 @@ export default function PolicyPage({ params }: Params) {
 				const a = await axios.post("http://localhost:3000/details/clients", {
 					clientIDS: array,
 				});
+				console.log(a);
+
 				const date = new Date().toISOString();
 				const newData = { ...a.data.data[0], last_ping: date };
 				setClientData(newData);
