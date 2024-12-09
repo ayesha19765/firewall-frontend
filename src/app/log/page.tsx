@@ -100,7 +100,7 @@ const logData: Log[] = [
 
 export default function LogsPage() {
   return (
-    <div className="flex flex-col gap-5 w-full">
+    <div className="flex flex-col gap-5 w-[80vw] md:w-full">
       <PageTitle title="Logs" />
 
       {/* Node Information */}

@@ -42,7 +42,7 @@ export default function Home() {
 			</section>
 
 			{/* Top Row: Donut Chart, Summary Card, Line Chart */}
-			<section className='grid w-full gap-4 grid-cols-1 md:grid-cols-3'>
+			<section className='grid w-[85vw] md:w-full gap-4 grid-cols-1 md:grid-cols-3'>
 				{/* Donut Chart */}
 				<div className='flex-1'>
 					<CardContent>
@@ -82,13 +82,13 @@ export default function Home() {
 			</section>
 
 			{/* Full-width Agents Table */}
-			<section className='w-full'>
+			<section className='w-[85vw] md:w-full'>
 				<CardContent>
 					<p className='p-4 font-semibold'>Overview</p>
 					<AgentsTable />
 				</CardContent>
 			</section>
-			<section className='w-full'>
+			<section className='w-[85vw] md:w-full'>
 				<CardContent>
 					<p className='p-4 font-semibold'>ML Model notifications</p>
 					<MlAlerts />
