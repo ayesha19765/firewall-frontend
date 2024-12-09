@@ -20,15 +20,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "./ui/button";
 
-interface DataTableProps<TData, TValue> {
-	columns: ColumnDef<TData, TValue>[];
-	data: TData[];
-}
+// interface DataTableProps<TData, TValue> {
+// 	columns: ColumnDef<TData, TValue>[];
+// 	data: TData[];
+// }
 
-export function DataTable<TData, TValue>({
-	columns,
-	data,
-}: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ columns, data }) {
 	const table = useReactTable({
 		data,
 		columns,
@@ -38,7 +35,7 @@ export function DataTable<TData, TValue>({
 
 	return (
 		<div>
-			<div className='rounded-md border text-xs'>
+			<div className='rounded-md max-w-[75vw] border text-xs scroll-auto'>
 				<Table>
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
@@ -59,7 +56,7 @@ export function DataTable<TData, TValue>({
 						))}
 					</TableHeader>
 					<TableBody className='text-sm'>
-						{table.getRowModel().rows?.length ? (
+						{table?.getRowModel().rows?.length ? (
 							table.getRowModel().rows.map((row) => (
 								<TableRow
 									key={row.id}

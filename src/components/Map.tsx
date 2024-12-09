@@ -17,7 +17,7 @@ const MapComponent = ({ coordinates }) => {
 	return (
 		<MapContainer
 			center={[defaultCenter.lat, defaultCenter.lng]}
-			zoom={13}
+			zoom={10}
 			className='-z-10 flex justify-center items-center'
 			style={{ height: "45vh", width: "full" }}>
 			<TileLayer

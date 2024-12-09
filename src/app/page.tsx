@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import PageTitle from "@/components/PageTitle";
 import Card, { CardContent, CardProps } from "@/components/Card";
 import AgentsTable from "@/components/AgentsTable";

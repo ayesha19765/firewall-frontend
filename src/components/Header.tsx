@@ -9,8 +9,10 @@ import {
 	MenubarShortcut,
 	MenubarTrigger,
 } from "@/components/ui/menubar";
+import { useRouter } from "next/navigation";
 
 const Header = () => {
+	const router = useRouter();
 	return (
 		<div className='w-[99vw] h-[5vh] bg-[#102542] flex justify-between items-center px-8 z-50 sticky top-0  '>
 			<div className='text-white'>CSS ADMIN PORTAL</div>
@@ -23,9 +25,20 @@ const Header = () => {
 						</Avatar>
 					</MenubarTrigger>
 					<MenubarContent>
-						<MenubarItem>Profile</MenubarItem>
+						<MenubarItem
+							onClick={() => {
+								router.push("/profile");
+							}}>
+							Profile
+						</MenubarItem>
 						<MenubarSeparator />
-						<MenubarItem>Logout</MenubarItem>
+						<MenubarItem
+							onClick={() => {
+								localStorage.clear();
+								router.push("/login");
+							}}>
+							Logout
+						</MenubarItem>
 					</MenubarContent>
 				</MenubarMenu>
 			</Menubar>

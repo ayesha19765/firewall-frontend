@@ -6,6 +6,7 @@ import "./globals.css";
 import { cn } from "../lib/utils";
 import ClientOnlySidebar from "@/components/ClientOnlySidebar";
 import Header from "@/components/Header";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -39,6 +40,7 @@ export default function RootLayout({
 						<div className={hasPadding ? "p-8 w-full" : "w-full"}>
 							{children}
 						</div>
+						<Toaster />
 					</div>
 				</div>
 			</body>
