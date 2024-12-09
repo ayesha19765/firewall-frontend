@@ -18,6 +18,7 @@ import RunningProcesses from "@/components/RunningProcesses";
 import OpenPorts from "@/components/OpenPorts";
 import DomainMapping from "@/components/DomainMapping";
 import ApplicationData from "@/components/ApplicationData";
+import Interfaces from "@/components/Interfaces";
 interface ClientProps {
 	clientID: string;
 }
@@ -104,7 +105,9 @@ export default function PolicyPage({ params }: Params) {
 	const [applicationData, setApplicationData] = useState();
 	const [activeConnections, setActiveConnections] = useState();
 	const [domainMapping, setDomainMapping] = useState();
+	const [interfaces, setInterfaces] = useState();
 	const [openPorts, setOpenPorts] = useState();
+	const [networkUsage, setNetworkUsage] = useState();
 	const clientID = "3b699cd7-2c43-4a02-8121-d859627d7a03"; // Access the host_id
 	// const { clientData, isLoading, error, fetchClientData } =
 	// 	useClientDataStore();
@@ -137,6 +140,8 @@ export default function PolicyPage({ params }: Params) {
 		setOpenPorts(clientData?.open_ports);
 		setDomainMapping(clientData?.domain_mapping);
 		setApplicationData(clientData?.application_data);
+		setInterfaces(clientData?.network_interfaces);
+		setNetworkUsage(clientData?.network_usage);
 		console.log(clientData);
 		// setNetworkActivity(clientData?.network);
 	}, [clientData]);
@@ -207,6 +212,8 @@ export default function PolicyPage({ params }: Params) {
 					<TabsTrigger value='ports'>Open Ports</TabsTrigger>
 					<TabsTrigger value='domain'>Domain Mapping</TabsTrigger>
 					<TabsTrigger value='appdata'>Application Data</TabsTrigger>
+					<TabsTrigger value='interfaces'>Network Interfaces</TabsTrigger>
+					<TabsTrigger value='network_usage'>Network Usage</TabsTrigger>
 				</TabsList>
 				<TabsContent value='account'>
 					<CardContent>
@@ -238,6 +245,40 @@ export default function PolicyPage({ params }: Params) {
 					<CardContent>
 						<div>Application Data</div>
 						{applicationData && <ApplicationData data={applicationData} />}
+					</CardContent>
+				</TabsContent>
+				<TabsContent value='interfaces'>
+					<CardContent>
+						<div>Application Data</div>
+						{applicationData && <Interfaces data={interfaces} />}
+					</CardContent>
+				</TabsContent>
+				<TabsContent value='network_usage'>
+					<CardContent>
+						<div className='bg-gray-100 p-2 border-2 shadow-md'>
+							<div className='grid grid-cols-2 gap-x-8 gap-y-4 px-6 py-2 text-xs'>
+								<div>
+									<span className='font-semibold'>Time of report:</span>{" "}
+									{clientData?.network_usage?.time_of_report || "N/A"}
+								</div>
+								<div>
+									<span className='font-semibold'>Bytes Sent:</span>{" "}
+									{clientData?.network_usage?.bytes_sent || "N/A"}
+								</div>
+								<div>
+									<span className='font-semibold'>Bytes Received:</span>{" "}
+									{clientData?.network_usage?.bytes_received || "N/A"}
+								</div>
+								<div>
+									<span className='font-semibold'>Packets Sent:</span>{" "}
+									{clientData?.network_usage?.packets_sent || "N/A"}
+								</div>
+								<div>
+									<span className='font-semibold'>Packets received:</span>{" "}
+									{clientData?.network_usage?.packets_received || "N/A"}
+								</div>
+							</div>
+						</div>
 					</CardContent>
 				</TabsContent>
 			</Tabs>
