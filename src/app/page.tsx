@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import PageTitle from "@/components/PageTitle";
+import { useRouter } from "next/navigation";
+
 import Card, { CardContent, CardProps } from "@/components/Card";
 import AgentsTable from "@/components/AgentsTable";
 import MlAlerts from "@/components/MlAlerts";
@@ -21,8 +23,13 @@ const cardData: CardProps[] = [
 const email = "admin@mail.com";
 
 export default function Home() {
+	const [activeClients, setActiveClients] = useState<string[]>([]);
+	const [inactiveClients, setInactiveClients] = useState<string[]>([]);
 	const [clientData, setClientData] = useState();
 	const [coordinates, setCoordinates] = useState([]);
+	const router = useRouter();
+	const admino = useUserStore((state) => state.user);
+	const emailo = JSON.parse(localStorage.getItem("admin"));
 	let admin = useUserStore((state) => state.user);
 	if (admin == null) admin = JSON.parse(localStorage.getItem("admin"));
 
@@ -54,6 +61,28 @@ export default function Home() {
 		func();
 	}, []);
 	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				console.log(emailo);
+				const adminResponse = await axios.post(
+					"http://localhost:3000/details/admin",
+					{
+						email: emailo.email,
+					}
+				);
+				const { activeClients, admin } = adminResponse.data;
+				setActiveClients(activeClients);
+				setInactiveClients(admin?.clientID);
+			} catch (error) {
+				console.error("Error fetching data:", error);
+			}
+		};
+		console.log("****************88");
+
+		fetchData();
+	}, []);
+
+	useEffect(() => {
 		const fetchCoordinates = async () => {
 			if (!clientData.length) return;
 			const coordinatesArray = await Promise.all(
@@ -64,7 +93,11 @@ export default function Home() {
 							`http://ip-api.com/json/${client.device_info.public_ip}`
 						);
 						const { lat, lon } = response.data;
-						return { lat, lng: lon, label: client.device_info.device_name || "Unknown" };
+						return {
+							lat,
+							lng: lon,
+							label: client.device_info.device_name || "Unknown",
+						};
 					} catch (error) {
 						console.error(
 							`Error fetching coordinates for IP ${client.public_ip}:`,
@@ -83,11 +116,11 @@ export default function Home() {
 		fetchCoordinates();
 	}, [clientData]); // Runs when clientData updates
 	return (
-		<div className='flex flex-col gap-4 w-full text-sm'>
+		<div className="flex flex-col gap-4 w-full text-sm">
 			<div>Dashboard - {admin?.email}</div>
 
 			{/* Cards Section */}
-			<section className='grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4'>
+			<section className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 				{cardData.map((d, i) => (
 					<Card
 						key={i}
@@ -100,24 +133,29 @@ export default function Home() {
 			</section>
 
 			{/* Top Row: Donut Chart, Summary Card, Line Chart */}
-			<section className='grid w-[85vw] md:w-full gap-4 grid-cols-1 md:grid-cols-3'>
+			<section className="grid w-[85vw] md:w-full gap-4 grid-cols-1 md:grid-cols-3">
 				{/* Donut Chart */}
-				<div className='flex-1'>
+				<div className="flex-1">
 					<CardContent>
-						<p className='font-semibold'>Connection Status</p>
-						<DonutChart />
+						<p className="font-semibold">Connection Status</p>
+						<DonutChart
+							activeConnectionsNo={activeClients?.length ?? 0}
+							inactiveConnectionsNo={
+								(inactiveClients?.length ?? 0) - (activeClients?.length ?? 0)
+							}
+						/>
 					</CardContent>
 				</div>
 
 				<div>
 					<CardContent>
-						<p className='font-semibold'>Location of connected hosts</p>
+						<p className="font-semibold">Location of connected hosts</p>
 						<AlertsChart />
 					</CardContent>
 				</div>
 				<div>
 					<CardContent>
-						<p className='font-semibold'>Location of connected hosts</p>
+						<p className="font-semibold">Location of connected hosts</p>
 						<Map coordinates={coordinates} />
 					</CardContent>
 				</div>
@@ -140,15 +178,15 @@ export default function Home() {
 			</section>
 
 			{/* Full-width Agents Table */}
-			<section className='w-[85vw] md:w-full'>
+			<section className="w-[85vw] md:w-full">
 				<CardContent>
-					<p className='p-4 font-semibold'>Overview</p>
+					<p className="p-4 font-semibold">Overview</p>
 					<AgentsTable clientData={clientData} />
 				</CardContent>
 			</section>
-			<section className='w-[85vw] md:w-full'>
+			<section className="w-[85vw] md:w-full">
 				<CardContent>
-					<p className='p-4 font-semibold'>Rule Alerts</p>
+					<p className="p-4 font-semibold">Rule Alerts</p>
 					{/* <MlAlerts /> */}
 					<RulesAlerts />
 				</CardContent>

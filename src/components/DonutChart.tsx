@@ -7,116 +7,96 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from "chart.js";
 // Register required components
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
-// Hardcoded node data
-const nodes = [
-	{ id: 1, status: "active" },
-	{ id: 2, status: "inactive" },
-	{ id: 3, status: "disconnected" },
-	{ id: 4, status: "active" },
-	{ id: 5, status: "inactive" },
-	{ id: 6, status: "active" },
-	{ id: 7, status: "disconnected" },
-	{ id: 8, status: "active" },
-	{ id: 9, status: "inactive" },
-	{ id: 10, status: "active" },
-];
+const DonutChart = ({ activeConnectionsNo, inactiveConnectionsNo }) => {
+	// Chart data using props
+	const data = {
+		labels: ["Active", "Inactive"],
+		datasets: [
+			{
+				data: [activeConnectionsNo, inactiveConnectionsNo],
+				backgroundColor: ["#0088FE", "#FF8042"],
+				borderWidth: 0,
+			},
+		],
+	};
 
-// Calculate the number of nodes with specific statuses
-const activeNodes = nodes.filter((node) => node.status === "active").length;
-const disconnectedNodes = nodes.filter(
-	(node) => node.status === "inactive"
-).length;
-const neverConnectedNodes = nodes.filter(
-	(node) => node.status === "disconnected"
-).length;
-
-const data = {
-	labels: ["Active", "Disconnected", "Never Connected"],
-	datasets: [
-		{
-			data: [activeNodes, disconnectedNodes, neverConnectedNodes],
-			backgroundColor: ["#0088FE", "#FF8042", "#FFBB28"],
-			borderWidth: 0,
-		},
-	],
-};
-
-const options = {
-	responsive: true,
-	plugins: {
-		legend: {
-			display: false, // Hide the built-in legend
-		},
-		tooltip: {
-			callbacks: {
-				label: function (context) {
-					let label = context.label || "";
-					if (context.parsed !== null) {
-						label += `: ${context.parsed}`;
-					}
-					return label;
+	const options = {
+		responsive: true,
+		plugins: {
+			legend: {
+				display: false, // Hide the built-in legend
+			},
+			tooltip: {
+				callbacks: {
+					label: function (context) {
+						let label = context.label || "";
+						if (context.parsed !== null) {
+							label += `: ${context.parsed}`;
+						}
+						return label;
+					},
 				},
 			},
+			title: {
+				display: false,
+			},
 		},
-		title: {
-			display: false,
-		},
-	},
-	cutout: "75%",
-};
+		cutout: "75%",
+	};
 
-const DonutChart = () => (
-	<div
-		style={{
-			height: "200px",
-			width: "100%",
-			display: "flex",
-			alignItems: "center",
-		}}>
+	return (
 		<div
 			style={{
-				flex: "2",
+				height: "200px",
+				width: "100%",
 				display: "flex",
-				justifyContent: "center",
 				alignItems: "center",
 			}}>
-			<div style={{ width: "70%", height: "70%" }}>
-				<Doughnut
-					data={data}
-					options={options}
-				/>
+			<div
+				style={{
+					flex: "2",
+					display: "flex",
+					justifyContent: "center",
+					alignItems: "center",
+				}}>
+				<div style={{ width: "70%", height: "70%" }}>
+					<Doughnut
+						data={data}
+						options={options}
+					/>
+				</div>
+			</div>
+			<div
+				style={{
+					flex: "1",
+					display: "flex",
+					flexDirection: "column",
+					justifyContent: "flex-start",
+					alignItems: "flex-start",
+				}}>
+				{data.labels.map((label, index) => (
+					<div
+						key={label}
+						style={{
+							marginBottom: "8px",
+							display: "flex",
+							alignItems: "center",
+						}}>
+						<div
+							style={{
+								width: "12px",
+								height: "12px",
+								backgroundColor: data.datasets[0].backgroundColor[index],
+								marginRight: "8px",
+							}}></div>
+						<span style={{ fontSize: "12px" }}>
+							{label}: {data.datasets[0].data[index]}
+						</span>
+					</div>
+				))}
 			</div>
 		</div>
-		<div
-			style={{
-				flex: "1",
-				display: "flex",
-				flexDirection: "column",
-				justifyContent: "flex-start",
-				alignItems: "flex-start",
-			}}>
-			{data.labels.map((label, index) => (
-				<div
-					key={label}
-					style={{
-						marginBottom: "8px",
-						display: "flex",
-						alignItems: "center",
-					}}>
-					<div
-						style={{
-							width: "12px",
-							height: "12px",
-							backgroundColor: data.datasets[0].backgroundColor[index],
-							marginRight: "8px",
-						}}></div>
-					<span style={{ fontSize: "12px" }}>
-						{label}: {data.datasets[0].data[index]}
-					</span>
-				</div>
-			))}
-		</div>
-	</div>
-);
+	);
+};
 
 export default DonutChart;
