@@ -7,23 +7,41 @@ import {
 	TableHead,
 	TableCell,
 } from "./ui/table";
+import { Input } from "./ui/input";
 
 const ActiveConnections = ({ data }: any) => {
 	// State to manage the current page
 	const [currentPage, setCurrentPage] = useState(1);
 
+	// State to manage the search query
+	const [searchQuery, setSearchQuery] = useState("");
+
 	// Number of entries per page
 	const entriesPerPage = 15;
+
+	// Filter the data based on the search query
+	const filteredData = data?.filter(
+		(element: any) =>
+			[
+				element.process_name,
+				element.protocol,
+				element.status,
+				element.local_address,
+				element.remote_address,
+			]
+				.map((field) => field?.toString().toLowerCase()) // Convert fields to string and lowercase
+				.some((field) => field.includes(searchQuery.toLowerCase())) // Check if any field includes the search query
+	);
 
 	// Calculate the index of the first and last entries on the current page
 	const indexOfLastEntry = currentPage * entriesPerPage;
 	const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
 
-	// Slice the data for the current page
-	const currentData = data?.slice(indexOfFirstEntry, indexOfLastEntry);
+	// Slice the filtered data for the current page
+	const currentData = filteredData?.slice(indexOfFirstEntry, indexOfLastEntry);
 
-	// Total number of pages
-	const totalPages = Math.ceil(data?.length / entriesPerPage);
+	// Total number of pages for filtered data
+	const totalPages = Math.ceil(filteredData?.length / entriesPerPage);
 
 	// Handler for changing pages
 	const handlePageChange = (pageNumber: number) => {
@@ -32,29 +50,54 @@ const ActiveConnections = ({ data }: any) => {
 
 	return (
 		<div>
+			{/* Search Bar */}
+			<div className='mb-4 max-w-[75vw]'>
+				<Input
+					type='text'
+					placeholder='Search by Process Name, Protocol, Status, or IPs...'
+					value={searchQuery}
+					onChange={(e) => {
+						setSearchQuery(e.target.value);
+						setCurrentPage(1); // Reset to page 1 on search
+					}}
+					className='w-full'
+				/>
+			</div>
+
+			{/* Table */}
 			<div className='rounded-md max-w-[75vw] border text-xs scroll-auto'>
 				<Table>
 					<TableHeader>
 						<TableRow>
 							<TableHead>Process ID</TableHead>
+							<TableHead>Process Name</TableHead>
 							<TableHead>Protocol</TableHead>
 							<TableHead>Local Address</TableHead>
 							<TableHead>Remote Address</TableHead>
 							<TableHead>Status</TableHead>
-							<TableHead>Process Name</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{currentData?.map((element: any, index: any) => (
-							<TableRow key={index}>
-								<TableCell>{element.pid}</TableCell>
-								<TableCell>{element.protocol}</TableCell>
-								<TableCell>{element.local_address}</TableCell>
-								<TableCell>{element.remote_address}</TableCell>
-								<TableCell>{element.status}</TableCell>
-								<TableCell>{element.process_name}</TableCell>
+						{currentData?.length > 0 ? (
+							currentData.map((element: any, index: any) => (
+								<TableRow key={index}>
+									<TableCell>{element.pid}</TableCell>
+									<TableCell>{element.process_name}</TableCell>
+									<TableCell>{element.protocol}</TableCell>
+									<TableCell>{element.local_address}</TableCell>
+									<TableCell>{element.remote_address}</TableCell>
+									<TableCell>{element.status}</TableCell>
+								</TableRow>
+							))
+						) : (
+							<TableRow>
+								<TableCell
+									colSpan={6}
+									className='text-center'>
+									No matching records found
+								</TableCell>
 							</TableRow>
-						))}
+						)}
 					</TableBody>
 				</Table>
 			</div>

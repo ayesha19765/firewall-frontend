@@ -10,9 +10,11 @@ import {
 	MenubarTrigger,
 } from "@/components/ui/menubar";
 import { useRouter } from "next/navigation";
+import { useUserStore } from "@/lib/store/userStore";
 
 const Header = () => {
 	const router = useRouter();
+	const logoutUser = useUserStore((state) => state.logoutUser);
 	return (
 		<div className='w-[99vw] h-[5vh] bg-[#102542] flex justify-between items-center px-8 z-50 sticky top-0  '>
 			<div className='text-white'>CSS ADMIN PORTAL</div>
@@ -35,6 +37,7 @@ const Header = () => {
 						<MenubarItem
 							onClick={() => {
 								localStorage.clear();
+								logoutUser();
 								router.push("/login");
 							}}>
 							Logout

@@ -19,7 +19,8 @@ import OpenPorts from "@/components/OpenPorts";
 import DomainMapping from "@/components/DomainMapping";
 import ApplicationData from "@/components/ApplicationData";
 import Interfaces from "@/components/Interfaces";
-import { useParams } from "react-router-dom";
+// import { useParams } from "react-router-dom";
+import { useRouter } from "next/navigation";
 interface ClientProps {
 	clientID: string;
 }
@@ -109,14 +110,18 @@ export default function PolicyPage({ params }: Params) {
 	const [interfaces, setInterfaces] = useState();
 	const [openPorts, setOpenPorts] = useState();
 	const [networkUsage, setNetworkUsage] = useState();
-	// const clientID = "3b699cd7-2c43-4a02-8121-d859627d7a03"; // Access the host_id
-	const { clientID } = useParams();
+	const [isOffline, setOffline] = useState(false);
+	const router = useRouter();
+	// const { clientID } = router.query;
+	const clientID = "3b699cd7-2c43-4a02-8121-d859627d7a03"; // Access the host_id
+	// const { clientID } = useParams();
+	console.log(clientID);
 	// const { clientData, isLoading, error, fetchClientData } =
 	// 	useClientDataStore();
 	useEffect(() => {
 		// fetchClientData(clientID);
 		const func = async () => {
-			const a = await axios.post("http://localhost:3000/details/client", {
+			const a = await axios.post("http://localhost:3000/resend/client", {
 				clientID: clientID,
 			});
 			if (a.data.error) {
@@ -125,7 +130,7 @@ export default function PolicyPage({ params }: Params) {
 				const a = await axios.post("http://localhost:3000/details/clients", {
 					clientIDS: array,
 				});
-				console.log(a);
+				setOffline(true);
 
 				const date = new Date().toISOString();
 				const newData = { ...a.data.data[0], last_ping: date };
@@ -166,11 +171,15 @@ export default function PolicyPage({ params }: Params) {
 						<span className='font-semibold'>IP Address:</span>{" "}
 						{clientData?.device_info?.public_ip || "N/A"}
 					</div>
-					<div>
-						<span className='font-semibold'>Up Time:</span>{" "}
-						{clientData?.device_info?.uptime?.days || "N/A"} days{" "}
-						{clientData?.device_info?.uptime?.hours || "N/A"} hours
-					</div>
+					{clientData?.device_info?.uptime.hours == 0 && (
+						<div>
+							<>
+								<span className='font-semibold'>Up Time:</span>{" "}
+								{clientData?.device_info?.uptime?.days || ""} days{" "}
+								{clientData?.device_info?.uptime?.hours || ""} hours
+							</>
+						</div>
+					)}
 					<div>
 						<span className='font-semibold'>CPU Cores:</span>{" "}
 						{clientData?.device_info?.cpu_info?.cpu_cores || "N/A"}
@@ -186,7 +195,8 @@ export default function PolicyPage({ params }: Params) {
 					</div>
 					<div>
 						<span className='font-semibold'>Used Memory:</span>{" "}
-						{clientData?.device_info?.memory_info?.used_memory || "N/A"}
+						{clientData?.device_info?.memory_info?.used_memory?.toFixed(2) ||
+							"N/A"}
 					</div>
 					<div>
 						<span className='font-semibold'>Last Ping:</span>{" "}
@@ -201,24 +211,33 @@ export default function PolicyPage({ params }: Params) {
 
 	return (
 		<div className='flex flex-col gap-5 w-full text-sm'>
-			<div>Host - {clientData?.device_info?.device_name || ""}</div>
+			<div className='flex justify-between w-full '>
+				<div className='flex gap-2 items-center'>
+					<div>Host - {clientData?.device_info?.device_name || ""}</div>
+					{isOffline ? (
+						<div className='w-2 h-2 rounded-full bg-red-500'></div>
+					) : (
+						<div className='w-2 h-2 rounded-full bg-green-500'></div>
+					)}
+				</div>
+			</div>
 
 			{/* Display Node Info */}
 			{dataElement}
 			{/* Policy DataTable */}
 
-			<Tabs
-				defaultValue='account'
-				className=''>
-				<TabsList>
-					<TabsTrigger value='account'>Running Applications</TabsTrigger>
-					<TabsTrigger value='password'>Active Connections</TabsTrigger>
-					<TabsTrigger value='ports'>Open Ports</TabsTrigger>
-					<TabsTrigger value='domain'>Domain Mapping</TabsTrigger>
-					<TabsTrigger value='appdata'>Application Data</TabsTrigger>
-					<TabsTrigger value='interfaces'>Network Interfaces</TabsTrigger>
-					<TabsTrigger value='network_usage'>Network Usage</TabsTrigger>
-				</TabsList>
+			<Tabs defaultValue='account'>
+				<div className='w-full flex justify-center my-2'>
+					<TabsList>
+						<TabsTrigger value='account'>Running Applications</TabsTrigger>
+						<TabsTrigger value='password'>Active Connections</TabsTrigger>
+						<TabsTrigger value='ports'>Open Ports</TabsTrigger>
+						<TabsTrigger value='domain'>Domain Mapping</TabsTrigger>
+						<TabsTrigger value='appdata'>Application Data</TabsTrigger>
+						<TabsTrigger value='interfaces'>Network Interfaces</TabsTrigger>
+						<TabsTrigger value='network_usage'>Network Usage</TabsTrigger>
+					</TabsList>
+				</div>
 				<TabsContent value='account'>
 					<CardContent>
 						<div>Running Applications</div>
@@ -227,7 +246,7 @@ export default function PolicyPage({ params }: Params) {
 				</TabsContent>
 				<TabsContent value='password'>
 					<CardContent>
-						<div>Applied Policies</div>
+						<div>Active Connections</div>
 						{activeConnections && (
 							<ActiveConnections data={activeConnections} />
 						)}
@@ -253,7 +272,7 @@ export default function PolicyPage({ params }: Params) {
 				</TabsContent>
 				<TabsContent value='interfaces'>
 					<CardContent>
-						<div>Application Data</div>
+						<div>Network Interfaces</div>
 						{applicationData && <Interfaces data={interfaces} />}
 					</CardContent>
 				</TabsContent>
@@ -271,7 +290,9 @@ export default function PolicyPage({ params }: Params) {
 								</div>
 								<div>
 									<span className='font-semibold'>Bytes Received:</span>{" "}
-									{clientData?.network_usage?.bytes_received || "N/A"}
+									{(
+										clientData?.network_usage?.bytes_received / 1000000000
+									).toFixed(2) || "N/A"}
 								</div>
 								<div>
 									<span className='font-semibold'>Packets Sent:</span>{" "}

@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useUserStore } from "../../lib/store/userStore"; // Import the Zustand store
 import Link from "next/link";
 import Image from "next/image"; // Import Image component for optimized image loading
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { toast } from "@/components/hooks/use-toast";
+import { useUserStore } from "@/lib/store/userStore";
 
 const Login: React.FC = () => {
 	const [email, setEmail] = useState("");
@@ -17,13 +17,15 @@ const Login: React.FC = () => {
 	const isLoading = useUserStore((state) => state.isLoading);
 	const router = useRouter(); // Use router for navigation
 
+	let admin = useUserStore((state) => state.user);
+
 	const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();
 		// Handle login logic
 		await loginUser(email, password, toast);
 
 		//Redirect to dashboard or homepage on successful login
-		if (!error) {
+		if (!admin?.adminID) {
 			router.push("/"); // Change the path as needed
 		}
 	};
@@ -37,7 +39,7 @@ const Login: React.FC = () => {
 					</div>
 				</div>
 				<h2 className='text-2xl text-center font-bold text-gray-700 mb-4'>
-					Cloud Console
+					Cyber Sanrakshak
 				</h2>
 
 				<form onSubmit={handleLogin}>
@@ -55,7 +57,7 @@ const Login: React.FC = () => {
 						/>
 					</div>
 
-					<div className='mb-4'>
+					{/* <div className='mb-4'>
 						<label className='block text-gray-700 text-sm font-bold mb-2'>
 							Role
 						</label>
@@ -81,7 +83,7 @@ const Login: React.FC = () => {
 								<span className='ml-2'>Admin</span>
 							</label>
 						</div>
-					</div>
+					</div> */}
 
 					<div className='mb-6'>
 						<label className='block text-gray-700 text-sm font-bold mb-2'>
@@ -124,13 +126,13 @@ const Login: React.FC = () => {
 					{error && <p className='text-red-500 mt-2'>{error}</p>}
 				</form>
 
-				<div className='mt-4 text-center'>
+				{/* <div className='mt-4 text-center'>
 					<Link
 						href='/forgot-password'
 						className='text-blue-500 hover:text-blue-700'>
 						Forgot your password?
 					</Link>
-				</div>
+				</div> */}
 
 				<div className='mt-4 text-center'>
 					<span>Don&apos;t have an account?</span>{" "}

@@ -13,6 +13,7 @@ import {
 	TableHead,
 	TableCell,
 } from "./ui/table";
+import DomainChart from "@/components/DomainChart";
 
 const DomainMapping = ({ data }: any) => {
 	return (
@@ -27,7 +28,8 @@ const DomainMapping = ({ data }: any) => {
 					<AccordionTrigger>{accordionItem.process_name}</AccordionTrigger>
 					<AccordionContent>
 						<div className='rounded-md max-w-full border text-xs overflow-auto'>
-							<Table>
+							<DomainChart data={accordionItem.domains} />
+							{/* <Table>
 								<TableHeader>
 									<TableRow>
 										<TableHead>Domain</TableHead>
@@ -47,7 +49,7 @@ const DomainMapping = ({ data }: any) => {
 										)
 									)}
 								</TableBody>
-							</Table>
+							</Table> */}
 						</div>
 					</AccordionContent>
 				</AccordionItem>

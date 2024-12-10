@@ -9,6 +9,7 @@ import { useUserStore } from "@/lib/store/userStore";
 export default function NodesTable({ clientData }: any) {
 	const admin = useUserStore((state) => state.user);
 	const router = useRouter(); // Initialize the router
+	console.log("ANKN", clientData);
 
 	const navigateToPolicy = () => {
 		router.push(`/policy`); // Navigate to the Policy page

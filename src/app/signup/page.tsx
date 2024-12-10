@@ -35,12 +35,12 @@ const Signup: React.FC = () => {
 			<div className='w-full max-w-md sm:max-w-sm bg-white p-4 sm:p-8 rounded-lg shadow-lg'>
 				{/* UI Components */}
 				<h2 className='text-lg sm:text-2xl text-center font-bold text-gray-700 mb-2 sm:mb-4'>
-					Sign up for Cloud Console
+					Sign up for Cyber Sanrakshak
 				</h2>
 
 				<form onSubmit={handleSignup}>
 					{/* Username Input */}
-					<div className='mb-2 sm:mb-4'>
+					{/* <div className='mb-2 sm:mb-4'>
 						<label className='block text-gray-700 text-xs sm:text-sm font-bold mb-1 sm:mb-2'>
 							Username
 						</label>
@@ -52,7 +52,7 @@ const Signup: React.FC = () => {
 							className='w-full px-2 sm:px-3 py-1 sm:py-2 text-gray-700 border rounded-lg focus:outline-none focus:ring focus:border-blue-300'
 							required
 						/>
-					</div>
+					</div> */}
 
 					{/* Email Input */}
 					<div className='mb-2 sm:mb-4'>
@@ -70,7 +70,7 @@ const Signup: React.FC = () => {
 					</div>
 
 					{/* Role Selection */}
-					<div className='mb-2 sm:mb-4'>
+					{/* <div className='mb-2 sm:mb-4'>
 						<label className='block text-gray-700 text-xs sm:text-sm font-bold mb-1 sm:mb-2'>
 							Role
 						</label>
@@ -96,7 +96,7 @@ const Signup: React.FC = () => {
 								<span className='ml-1 sm:ml-2'>Admin</span>
 							</label>
 						</div>
-					</div>
+					</div> */}
 
 					{/* Password Input */}
 					<div className='mb-4 sm:mb-6'>

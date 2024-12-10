@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import axios from "axios";
 import { useToast } from "@/components/hooks/use-toast";
+import { any } from "zod";
 interface User {
 	name: string;
 	email: string;
@@ -47,14 +48,20 @@ export const useUserStore = create<UserState>((set) => ({
 				adminID: adminID,
 				clientID: clientID,
 			} = response?.data.admin;
-			const token = response?.data.token;
-			localStorage.setItem("csstoken", token);
+
+			const userToStore = {
+				email: email,
+				password: password,
+				adminID: adminID,
+				clientID: clientID,
+			};
+			localStorage.setItem("admin", JSON.stringify(userToStore));
+
 			set({
 				user: {
 					email: email,
 					adminID: adminID,
 					clientID: clientID,
-					password: password,
 					name: "",
 				},
 				error: null,
@@ -90,7 +97,13 @@ export const useUserStore = create<UserState>((set) => ({
 
 			if (response.status == 200) {
 				const { email, adminID, clientID } = response.data.admin;
-				// localStorage.setItem("csstoken", token);
+				const userToStore = {
+					email: email,
+					adminID: adminID,
+					clientID: clientID,
+				};
+				localStorage.setItem("admin", JSON.stringify(userToStore));
+
 				set({ user: { email, adminID, clientID, name: "" }, error: null });
 				toast({
 					title: "Logged in successfully",

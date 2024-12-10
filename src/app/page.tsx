@@ -23,11 +23,11 @@ const coordinates = [
 	{ lat: 23.0268, lng: 72.5794, label: "Ahemdabad" },
 	{ lat: 23.0289, lng: 72.5614, label: "Ahemdabad" },
 ];
-const email = "admin@mail.com";
 
 export default function Home() {
 	const [clientData, setClientData] = useState();
-	const admin = useUserStore((state) => state.user);
+	let admin = useUserStore((state) => state.user);
+	if (admin == null) admin = JSON.parse(localStorage.getItem("admin"));
 	console.log(admin);
 
 	useEffect(() => {
@@ -36,7 +36,7 @@ export default function Home() {
 			const clientDataArray = [];
 			for (let i = 0; i < admin?.clientID.length; i++) {
 				const element = admin?.clientID[i];
-				const a = await axios.post("http://localhost:3000/details/client", {
+				const a = await axios.post("http://localhost:3000/resend/client", {
 					clientID: element,
 				});
 				if (a.data.error) {
@@ -66,7 +66,7 @@ export default function Home() {
 
 	return (
 		<div className='flex flex-col gap-4 w-full text-sm'>
-			<div>Dashboard - {email}</div>
+			<div>Dashboard - {admin?.email}</div>
 
 			{/* Cards Section */}
 			<section className='grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4'>

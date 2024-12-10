@@ -32,15 +32,13 @@ export default function SideNavbar({}: Props) {
 		<div
 			className={`${isCollapsed ? "w-14" : "min-w-[120px]"} ${
 				mobileWidth ? "w-[100vw] flex justify-center" : ""
-			} h-[50px] md:h-[100vh] border-r px-3 pb-10 md:pt-12 bg-[#e85555] sticky top-0 z-0 text-[#cdd7d6]`}
-		>
+			} h-[50px] md:h-[100vh] border-r px-3 pb-10 md:pt-12 bg-[#e85555] sticky top-0 z-0 text-[#cdd7d6]`}>
 			{!mobileWidth && (
 				<div className={`${isCollapsed ? "ml-6" : "ml-44"} right-[-20px] `}>
 					<Button
 						onClick={toggleSidebar}
-						variant="secondary"
-						className=" rounded-full p-2 border border-red-900"
-					>
+						variant='secondary'
+						className=' rounded-full p-2 border border-red-900'>
 						<ChevronRight />
 					</Button>
 				</div>
@@ -55,8 +53,8 @@ export default function SideNavbar({}: Props) {
 						variant: "default",
 					},
 					{
-						title: "Users",
-						href: "/users",
+						title: "Hosts",
+						href: "/host",
 						icon: UserRound,
 						variant: "ghost",
 					},
