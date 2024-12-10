@@ -28,12 +28,10 @@ interface BlocksTableProps {
 export function BlocksTable({ rules, onStatusChange }: BlocksTableProps) {
 	const [page, setPage] = useState(1);
 	const itemsPerPage = 10;
-	const totalPages = Math.ceil(rules.length / itemsPerPage);
+	const totalPages = Math.ceil((rules?.length ?? 0) / itemsPerPage);
 
-	const paginatedRules = rules.slice(
-		(page - 1) * itemsPerPage,
-		page * itemsPerPage
-	);
+	const paginatedRules =
+		rules?.slice((page - 1) * itemsPerPage, page * itemsPerPage) ?? [];
 
 	return (
 		<div className='space-y-4'>
@@ -53,19 +51,21 @@ export function BlocksTable({ rules, onStatusChange }: BlocksTableProps) {
 				<TableBody>
 					{paginatedRules.map((rule) => (
 						<TableRow key={rule.id}>
-							<TableCell>{rule.hostIds.join(", ")}</TableCell>
-							<TableCell>{rule.hostNames.join(", ")}</TableCell>
-							<TableCell>{rule.applications.join(", ")}</TableCell>
-							<TableCell>{rule.appCategory.join(", ")}</TableCell>
+							<TableCell>{rule.hostIds?.join(", ") ?? ""}</TableCell>
+							<TableCell>{rule.hostNames?.join(", ") ?? ""}</TableCell>
+							<TableCell>{rule.applications?.join(", ") ?? ""}</TableCell>
+							<TableCell>{rule.appCategory?.join(", ") ?? ""}</TableCell>
 							<TableCell>
-								{new Date(rule.timeApplied).toLocaleString()}
+								{rule.timeApplied
+									? new Date(rule.timeApplied).toLocaleString()
+									: ""}
 							</TableCell>
-							<TableCell>{rule.whitelistedDomains.join(", ")}</TableCell>
-							<TableCell>{rule.blacklistedDomains.join(", ")}</TableCell>
+							<TableCell>{rule.whitelistedDomains?.join(", ") ?? ""}</TableCell>
+							<TableCell>{rule.blacklistedDomains?.join(", ") ?? ""}</TableCell>
 							<TableCell>
 								<Switch
 									checked={rule.status === "applied"}
-									onCheckedChange={(checked: any) =>
+									onCheckedChange={(checked) =>
 										onStatusChange(rule.id, checked ? "applied" : "idle")
 									}
 								/>

@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { Search, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -11,8 +10,6 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Select,
 	SelectContent,
@@ -21,100 +18,60 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
+import { Textarea } from "@/components/ui/textarea";
 
 // Dummy data
-const HOSTS = [
-	"host1.example.com",
-	"host2.example.com",
-	"host3.example.com",
-	"host4.example.com",
-	"host5.example.com",
-];
+const HOSTS = {
+	client123: "host1.example.com",
+	client456: "host2.example.com",
+	client789: "host3.example.com",
+};
 
 const APPLICATIONS = ["Chrome", "Firefox", "Safari", "VS Code", "Slack"];
 
-const DOMAINS = [
-	{ name: "domain1.com", category: "Social Media" },
-	{ name: "domain2.com", category: "Social Media" },
-	{ name: "domain3.com", category: "Entertainment" },
-	{ name: "domain4.com", category: "Entertainment" },
-	{ name: "domain5.com", category: "Productivity" },
-];
-
-const CATEGORIES = ["Social Media", "Entertainment", "Productivity"];
-
-interface SelectedItems {
-	hosts: string[];
-	applications: string[];
-	domains: string[];
+interface Rule {
+	rule_name?: string;
+	rule_description?: string;
+	appName?: string;
+	domain?: string;
+	app_path?: string;
+	direction?: "inbound" | "outbound";
+	ports?: number[];
+	action?: "allow" | "deny";
 }
 
-export function AddRuleDialog({ open, onOpenChange, onAddRules }) {
-	const [selectedItems, setSelectedItems] = React.useState<SelectedItems>({
-		hosts: [],
-		applications: [],
-		domains: [],
+interface FormData {
+	clientID?: string;
+	rules: Rule[];
+}
+
+export function AddRuleDialog({
+	open,
+	onOpenChange,
+	onAddRules,
+}: {
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+	onAddRules: (data: FormData) => void;
+}) {
+	const [currentTab, setCurrentTab] = React.useState("host");
+	const [formData, setFormData] = React.useState<FormData>({
+		clientID: undefined,
+		rules: [{}],
 	});
-	const [hostSearchQuery, setHostSearchQuery] = React.useState("");
-	const [appSearchQuery, setAppSearchQuery] = React.useState("");
-	const [selectedCategory, setSelectedCategory] = React.useState("");
-	const [newDomain, setNewDomain] = React.useState("");
-	const [currentTab, setCurrentTab] = React.useState("hosts");
-	const [isAppSearchOpen, setIsAppSearchOpen] = React.useState(false);
-	const [isPopoverOpen, setPopoverOpen] = React.useState(false);
 
-	const filteredHosts = HOSTS.filter((host) =>
-		hostSearchQuery === "*"
-			? true
-			: host.toLowerCase().includes(hostSearchQuery.toLowerCase())
-	);
-
-	const filteredApps = APPLICATIONS.filter((app) =>
-		appSearchQuery === "*"
-			? true
-			: app.toLowerCase().includes(appSearchQuery.toLowerCase())
-	);
-
-	const filteredDomains = DOMAINS.filter(
-		(domain) => domain.category === selectedCategory
-	);
-
-	const handleItemToggle = (type: keyof SelectedItems, item: string) => {
-		setSelectedItems((prev) => {
-			const newItems = prev[type].includes(item)
-				? prev[type].filter((i) => i !== item)
-				: [...prev[type], item];
-			return { ...prev, [type]: newItems };
-		});
-	};
-
-	const handleAddDomain = () => {
-		const newDomains = newDomain.split(/[,\s]+/).filter(Boolean);
-		setSelectedItems((prev) => ({
+	const handleInputChange = (
+		field: keyof Rule,
+		value: string | number[] | undefined
+	) => {
+		setFormData((prev) => ({
 			...prev,
-			domains: [...prev.domains, ...newDomains],
-		}));
-		setNewDomain("");
-	};
-
-	const handleCategorySelect = (category: string) => {
-		setSelectedCategory(category);
-		const domainsInCategory = DOMAINS.filter(
-			(d) => d.category === category
-		).map((d) => d.name);
-		setSelectedItems((prev) => ({
-			...prev,
-			domains: [...new Set([...prev.domains, ...domainsInCategory])],
+			rules: [{ ...prev.rules[0], [field]: value }],
 		}));
 	};
 
 	const handleNext = () => {
-		const tabs = ["hosts", "applications", "domains"];
+		const tabs = ["host", "application", "domain", "ports", "rest"];
 		const currentIndex = tabs.indexOf(currentTab);
 		if (currentIndex < tabs.length - 1) {
 			setCurrentTab(tabs[currentIndex + 1]);
@@ -122,177 +79,150 @@ export function AddRuleDialog({ open, onOpenChange, onAddRules }) {
 	};
 
 	const handleAddRule = () => {
-		console.log("Rule added:", selectedItems);
-		// Here you would typically send this data to your backend or perform some action
+		console.log("Rule added:", formData);
+		onAddRules(formData);
+		onOpenChange(false);
 	};
 
 	return (
-		<Dialog>
-			<DialogTrigger
-				asChild
-				className='bg-black text-white hover:bg-black hover:text-gray-300'>
+		<Dialog
+			open={open}
+			onOpenChange={onOpenChange}>
+			<DialogTrigger asChild>
 				<Button variant='outline'>+ Add Rule</Button>
 			</DialogTrigger>
-			<DialogContent className='sm:max-w-[600px]'>
+			<DialogContent className='sm:max-w-[500px]'>
 				<DialogHeader>
-					<DialogTitle>What Do You Want to Block?</DialogTitle>
+					<DialogTitle>Add New Rule</DialogTitle>
 				</DialogHeader>
 				<Tabs
 					value={currentTab}
 					onValueChange={setCurrentTab}
 					className='w-full'>
-					<TabsList className='grid w-full grid-cols-3'>
-						<TabsTrigger value='hosts'>Hosts</TabsTrigger>
-						<TabsTrigger value='applications'>Applications</TabsTrigger>
-						<TabsTrigger value='domains'>Domains</TabsTrigger>
+					<TabsList className='grid w-full grid-cols-5'>
+						<TabsTrigger value='host'>Host</TabsTrigger>
+						<TabsTrigger value='application'>Application</TabsTrigger>
+						<TabsTrigger value='domain'>Domain</TabsTrigger>
+						<TabsTrigger value='ports'>Ports</TabsTrigger>
+						<TabsTrigger value='rest'>Rest</TabsTrigger>
 					</TabsList>
 
-					{/* Hosts Tab */}
 					<TabsContent
-						value='hosts'
+						value='host'
 						className='space-y-4'>
-						<div className='flex items-center space-x-2'>
-							<Search className='w-4 h-4' />
-							<Input
-								placeholder='Search hosts... (use * to select all)'
-								value={hostSearchQuery}
-								onChange={(e) => setHostSearchQuery(e.target.value)}
-							/>
-						</div>
-						<div className='space-y-2'>
-							{filteredHosts.map((host) => (
-								<div
-									key={host}
-									className='flex items-center space-x-2'>
-									<Checkbox
-										id={host}
-										checked={selectedItems.hosts.includes(host)}
-										onCheckedChange={() => handleItemToggle("hosts", host)}
-									/>
-									<Label htmlFor={host}>{host}</Label>
-								</div>
-							))}
-						</div>
-						<div className='border rounded-lg p-4 min-h-[100px]'>
-							{selectedItems.hosts.map((host) => (
-								<div
-									key={host}
-									className='flex items-center justify-between py-1'>
-									<span>{host}</span>
-									<Button
-										variant='ghost'
-										size='sm'
-										onClick={() => handleItemToggle("hosts", host)}>
-										<Minus className='h-4 w-4' />
-									</Button>
-								</div>
-							))}
-						</div>
-					</TabsContent>
-
-					{/* Applications Tab */}
-					<TabsContent
-						value='applications'
-						className='space-y-4'>
-						<Popover
-							open={isPopoverOpen}
-							onOpenChange={setPopoverOpen}>
-							<PopoverTrigger asChild>
-								<div
-									className='flex items-center space-x-2 cursor-pointer'
-									onClick={() => onOpenChange(true)}>
-									<Search className='w-4 h-4' />
-									<Input
-										placeholder='Search applications... (use * to select all)'
-										value={appSearchQuery}
-										onChange={(e) => setAppSearchQuery(e.target.value)}
-										onFocus={() => setPopoverOpen(true)}
-									/>
-								</div>
-							</PopoverTrigger>
-							<PopoverContent className='w-80'>
-								<div className='space-y-2'>
-									{filteredApps.map((app) => (
-										<div
-											key={app}
-											className='flex items-center space-x-2'>
-											<Checkbox
-												id={app}
-												checked={selectedItems.applications.includes(app)}
-												onCheckedChange={() =>
-													handleItemToggle("applications", app)
-												}
-											/>
-											<Label htmlFor={app}>{app}</Label>
-										</div>
-									))}
-								</div>
-							</PopoverContent>
-						</Popover>
-						<div className='border rounded-lg p-4 min-h-[100px]'>
-							{selectedItems.applications.map((app) => (
-								<div
-									key={app}
-									className='flex items-center justify-between py-1'>
-									<span>{app}</span>
-									<Button
-										variant='ghost'
-										size='sm'
-										onClick={() => handleItemToggle("applications", app)}>
-										<Minus className='h-4 w-4' />
-									</Button>
-								</div>
-							))}
-						</div>
-					</TabsContent>
-
-					{/* Domains Tab */}
-					<TabsContent
-						value='domains'
-						className='space-y-4'>
-						<Select onValueChange={handleCategorySelect}>
+						<Select
+							onValueChange={(value) =>
+								setFormData((prev) => ({ ...prev, clientID: value }))
+							}>
 							<SelectTrigger>
-								<SelectValue placeholder='Select category' />
+								<SelectValue placeholder='Select host' />
 							</SelectTrigger>
 							<SelectContent>
-								{CATEGORIES.map((category) => (
+								{Object.entries(HOSTS).map(([id, host]) => (
 									<SelectItem
-										key={category}
-										value={category}>
-										{category}
+										key={id}
+										value={id}>
+										{host}
 									</SelectItem>
 								))}
 							</SelectContent>
 						</Select>
-						<div className='flex space-x-2'>
-							<Input
-								placeholder='Enter domains (comma or space-separated)'
-								value={newDomain}
-								onChange={(e) => setNewDomain(e.target.value)}
-							/>
-							<Button onClick={handleAddDomain}>
-								<Plus className='h-4 w-4' />
-							</Button>
-						</div>
-						<div className='border rounded-lg p-4 min-h-[100px]'>
-							{selectedItems.domains.map((domain) => (
-								<div
-									key={domain}
-									className='flex items-center justify-between py-1'>
-									<span>{domain}</span>
-									<Button
-										variant='ghost'
-										size='sm'
-										onClick={() => handleItemToggle("domains", domain)}>
-										<Minus className='h-4 w-4' />
-									</Button>
-								</div>
-							))}
-						</div>
+					</TabsContent>
+
+					<TabsContent
+						value='application'
+						className='space-y-4'>
+						<Select
+							onValueChange={(value) => handleInputChange("appName", value)}>
+							<SelectTrigger>
+								<SelectValue placeholder='Select application' />
+							</SelectTrigger>
+							<SelectContent>
+								{APPLICATIONS.map((app) => (
+									<SelectItem
+										key={app}
+										value={app}>
+										{app}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						<Input
+							placeholder='Application path'
+							value={formData.rules[0]?.app_path ?? ""}
+							onChange={(e) => handleInputChange("app_path", e.target.value)}
+						/>
+					</TabsContent>
+
+					<TabsContent
+						value='domain'
+						className='space-y-4'>
+						<Input
+							placeholder='Enter domain'
+							value={formData.rules[0]?.domain ?? ""}
+							onChange={(e) => handleInputChange("domain", e.target.value)}
+						/>
+					</TabsContent>
+
+					<TabsContent
+						value='ports'
+						className='space-y-4'>
+						<Input
+							placeholder='Enter ports (comma-separated)'
+							value={formData.rules[0]?.ports?.join(", ") ?? ""}
+							onChange={(e) => {
+								const ports = e.target.value
+									.split(",")
+									.map((port) => parseInt(port.trim()))
+									.filter((port) => !isNaN(port));
+								handleInputChange("ports", ports);
+							}}
+						/>
+					</TabsContent>
+
+					<TabsContent
+						value='rest'
+						className='space-y-4'>
+						<Input
+							placeholder='Rule name'
+							value={formData.rules[0]?.rule_name ?? ""}
+							onChange={(e) => handleInputChange("rule_name", e.target.value)}
+						/>
+						<Textarea
+							placeholder='Rule description'
+							value={formData.rules[0]?.rule_description ?? ""}
+							onChange={(e) =>
+								handleInputChange("rule_description", e.target.value)
+							}
+						/>
+						<Select
+							onValueChange={(value) =>
+								handleInputChange("direction", value as "inbound" | "outbound")
+							}>
+							<SelectTrigger>
+								<SelectValue placeholder='Select direction' />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value='inbound'>Inbound</SelectItem>
+								<SelectItem value='outbound'>Outbound</SelectItem>
+							</SelectContent>
+						</Select>
+						<Select
+							onValueChange={(value) =>
+								handleInputChange("action", value as "allow" | "deny")
+							}>
+							<SelectTrigger>
+								<SelectValue placeholder='Select action' />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value='allow'>Allow</SelectItem>
+								<SelectItem value='deny'>Deny</SelectItem>
+							</SelectContent>
+						</Select>
 					</TabsContent>
 				</Tabs>
 				<div className='flex justify-between mt-4'>
-					{currentTab !== "domains" ? (
+					{currentTab !== "rest" ? (
 						<Button onClick={handleNext}>Next</Button>
 					) : (
 						<Button onClick={handleAddRule}>Add Rule</Button>

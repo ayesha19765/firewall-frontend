@@ -1,18 +1,8 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+import { useState } from "react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -21,342 +11,240 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
-import { HostSelect } from "./SelectHost";
-import { AppSelect } from "./SelectApplication";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 
-const formSchema = z
-	.object({
-		application: z.string().optional(),
-		domain: z.string().optional(),
-		protocol: z.string().optional(),
-		port: z.string().optional(),
-		ip: z.string().optional(),
-		blockCountry: z.string().optional(),
-		direction: z.string().min(1, { message: "Direction is required" }),
-		description: z.string().min(1, { message: "Description is required" }),
-		action: z.string().min(1, { message: "Action is required" }),
-		endTime: z.string().min(1, { message: "End time is required" }),
-	})
-	.refine(
-		(data) => {
-			const group1 = [
-				data.application,
-				data.domain,
-				data.protocol,
-				data.port,
-				data.ip,
-			];
-			const group2 = data.blockCountry;
-			return group1.some(Boolean) || group2;
-		},
-		{
-			message: "At least one field from Group 1 or Group 2 must be selected",
-			path: ["application"],
-		}
+// Mock data
+const HOSTS = [
+	{ id: "5f867ba9-bec4-4ea1-bbf2-adb4873dccbb", name: "Host 1" },
+	{ id: "6f867ba9-bec4-4ea1-bbf2-adb4873dccbb", name: "Host 2" },
+];
+
+const APPLICATIONS = [
+	{ id: "1", name: "Application 1", path: "/path/to/app1" },
+	{ id: "2", name: "Application 2", path: "/path/to/app2" },
+];
+
+interface BlockingRule {
+	rule_name: string;
+	domain?: string;
+	application?: string;
+	port?: string;
+	direction: "inbound" | "outbound";
+	action: "block" | "allow";
+}
+
+export default function BlockingModal() {
+	const [open, setOpen] = useState(true);
+	const [selectedHost, setSelectedHost] = useState("");
+	const [currentTab, setCurrentTab] = useState("hosts");
+	const [ruleName, setRuleName] = useState("");
+	const [domain, setDomain] = useState("");
+	const [application, setApplication] = useState("");
+	const [port, setPort] = useState("");
+	const [direction, setDirection] = useState<"inbound" | "outbound">(
+		"outbound"
 	);
+	const [action, setAction] = useState<"block" | "allow">("block");
 
-export function FirewallRuleForm() {
-	const [selectedHost, setSelectedHost] = useState<{
-		id: string;
-		name: string;
-		ip: string;
-		os: string;
-		platform: string;
-	} | null>(null);
-	const [selectedApp, setSelectedApp] = useState<{
-		id: string;
-		appName: string;
-		path: string;
-		os: string;
-		platform: string;
-	} | null>(null);
-	const [group1Selected, setGroup1Selected] = useState(false);
-	const [group2Selected, setGroup2Selected] = useState(false);
+	const canProceed =
+		selectedHost !== "" && (domain !== "" || application !== "" || port !== "");
 
-	const form = useForm<z.infer<typeof formSchema>>({
-		resolver: zodResolver(formSchema),
-		defaultValues: {
-			application: "",
-			domain: "",
-			protocol: "",
-			port: "",
-			ip: "",
-			blockCountry: "",
-			direction: "",
-			description: "",
-			action: "",
-			endTime: "",
-		},
-	});
+	const handleSubmit = () => {
+		if (!canProceed || !ruleName) return;
 
-	function onSubmit(values: z.infer<typeof formSchema>) {
-		console.log(values);
-	}
+		const rule: BlockingRule = {
+			rule_name: ruleName,
+			direction,
+			action,
+		};
 
-	const handleGroup1Change = (value: string) => {
-		setGroup1Selected(!!value);
-		if (!!value) setGroup2Selected(false);
-	};
+		if (domain) rule.domain = domain;
+		if (application) rule.application = application;
+		if (port) rule.port = port;
 
-	const handleGroup2Change = (value: string) => {
-		setGroup2Selected(!!value);
-		if (!!value) setGroup1Selected(false);
+		const payload = {
+			clientID: selectedHost,
+			listType: "whitelist",
+			rules: [rule],
+		};
+
+		console.log("Submitting:", payload);
+		setOpen(false);
 	};
 
 	return (
-		<div className='space-y-8'>
-			<div>
-				<h2 className='text-2xl font-bold mb-4'>Select Host</h2>
-				<HostSelect onSelect={setSelectedHost} />
-			</div>
+		<Dialog
+			open={open}
+			onOpenChange={setOpen}>
+			<DialogContent className='sm:max-w-[600px]'>
+				<DialogHeader>
+					<DialogTitle className='text-xl font-semibold'>
+						What Do You Want to Block?
+					</DialogTitle>
+					<Button
+						variant='ghost'
+						size='icon'
+						className='absolute right-4 top-4'
+						onClick={() => setOpen(false)}>
+						<X className='h-4 w-4' />
+					</Button>
+				</DialogHeader>
+				<div className='mt-4'>
+					<Tabs
+						value={currentTab}
+						onValueChange={setCurrentTab}>
+						<TabsList className='grid w-full grid-cols-6'>
+							<TabsTrigger
+								value='hosts'
+								className='text-center'>
+								Hosts
+							</TabsTrigger>
+							<TabsTrigger
+								value='applications'
+								disabled={!selectedHost}>
+								Applications
+							</TabsTrigger>
+							<TabsTrigger
+								value='domains'
+								disabled={!selectedHost}>
+								Domains
+							</TabsTrigger>
+							<TabsTrigger
+								value='ports'
+								disabled={!selectedHost}>
+								Ports
+							</TabsTrigger>
+							<TabsTrigger
+								value='direction'
+								disabled={!selectedHost}>
+								Direction
+							</TabsTrigger>
+							<TabsTrigger
+								value='action'
+								disabled={!selectedHost}>
+								Action
+							</TabsTrigger>
+						</TabsList>
 
-			{selectedHost && (
-				<div className='bg-gray-100 p-4 rounded-md'>
-					<h3 className='text-lg font-semibold mb-2'>Host Information</h3>
-					<p>
-						<strong>Name:</strong> {selectedHost.name}
-					</p>
-					<p>
-						<strong>IP:</strong> {selectedHost.ip}
-					</p>
-					<p>
-						<strong>OS:</strong> {selectedHost.os}
-					</p>
-					<p>
-						<strong>Platform:</strong> {selectedHost.platform}
-					</p>
-				</div>
-			)}
+						<TabsContent
+							value='hosts'
+							className='space-y-4'>
+							<Select
+								value={selectedHost}
+								onValueChange={setSelectedHost}>
+								<SelectTrigger>
+									<SelectValue placeholder='Select host' />
+								</SelectTrigger>
+								<SelectContent>
+									{HOSTS.map((host) => (
+										<SelectItem
+											key={host.id}
+											value={host.id}>
+											{host.name}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</TabsContent>
 
-			<Form {...form}>
-				<form
-					onSubmit={form.handleSubmit(onSubmit)}
-					className='space-y-8'>
-					<div>
-						<h3 className='text-lg font-semibold mb-2'>Group 1 Fields</h3>
-						<div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-							<div>
-								<h2 className='font-bold mb-4'>Select Application</h2>
-								<AppSelect onSelect={setSelectedApp} />
-							</div>
-							{/* <FormField
-								control={form.control}
-								name='application'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Application</FormLabel>
-										<FormControl>
-											<Input
-												{...field}
-												disabled={group2Selected}
-												onChange={(e) => {
-													field.onChange(e);
-													handleGroup1Change(e.target.value);
-												}}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/> */}
-							<FormField
-								control={form.control}
-								name='domain'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Domain</FormLabel>
-										<FormControl>
-											<Input
-												{...field}
-												disabled={group2Selected}
-												onChange={(e) => {
-													field.onChange(e);
-													handleGroup1Change(e.target.value);
-												}}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name='protocol'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Protocol</FormLabel>
-										<FormControl>
-											<Input
-												{...field}
-												disabled={group2Selected}
-												onChange={(e) => {
-													field.onChange(e);
-													handleGroup1Change(e.target.value);
-												}}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name='port'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Port</FormLabel>
-										<FormControl>
-											<Input
-												{...field}
-												disabled={group2Selected}
-												onChange={(e) => {
-													field.onChange(e);
-													handleGroup1Change(e.target.value);
-												}}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name='ip'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>IP</FormLabel>
-										<FormControl>
-											<Input
-												{...field}
-												disabled={group2Selected}
-												onChange={(e) => {
-													field.onChange(e);
-													handleGroup1Change(e.target.value);
-												}}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</div>
-					</div>
+						<TabsContent
+							value='applications'
+							className='space-y-4'>
+							<Select
+								value={application}
+								onValueChange={setApplication}>
+								<SelectTrigger>
+									<SelectValue placeholder='Select application' />
+								</SelectTrigger>
+								<SelectContent>
+									{APPLICATIONS.map((app) => (
+										<SelectItem
+											key={app.id}
+											value={app.id}>
+											{app.name}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</TabsContent>
 
-					<Separator />
+						<TabsContent
+							value='domains'
+							className='space-y-4'>
+							<Input
+								placeholder='Enter domains (comma or space-separated)'
+								value={domain}
+								onChange={(e) => setDomain(e.target.value)}
+							/>
+						</TabsContent>
 
-					<div>
-						<h3 className='text-lg font-semibold mb-2'>Group 2 Fields</h3>
-						<FormField
-							control={form.control}
-							name='blockCountry'
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Block Country</FormLabel>
-									<FormControl>
-										<Input
-											{...field}
-											disabled={group1Selected}
-											onChange={(e) => {
-												field.onChange(e);
-												handleGroup2Change(e.target.value);
-											}}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
+						<TabsContent
+							value='ports'
+							className='space-y-4'>
+							<Input
+								placeholder='Enter port number'
+								type='number'
+								value={port}
+								onChange={(e) => setPort(e.target.value)}
+							/>
+						</TabsContent>
+
+						<TabsContent
+							value='direction'
+							className='space-y-4'>
+							<Select
+								value={direction}
+								onValueChange={(value: "inbound" | "outbound") =>
+									setDirection(value)
+								}>
+								<SelectTrigger>
+									<SelectValue placeholder='Select direction' />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value='inbound'>Inbound</SelectItem>
+									<SelectItem value='outbound'>Outbound</SelectItem>
+								</SelectContent>
+							</Select>
+						</TabsContent>
+
+						<TabsContent
+							value='action'
+							className='space-y-4'>
+							<Select
+								value={action}
+								onValueChange={(value: "block" | "allow") => setAction(value)}>
+								<SelectTrigger>
+									<SelectValue placeholder='Select action' />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value='block'>Block</SelectItem>
+									<SelectItem value='allow'>Allow</SelectItem>
+								</SelectContent>
+							</Select>
+						</TabsContent>
+					</Tabs>
+
+					<div className='mt-4 space-y-4'>
+						<Input
+							placeholder='Enter rule name'
+							value={ruleName}
+							onChange={(e) => setRuleName(e.target.value)}
 						/>
+						<Button
+							className='w-full'
+							onClick={handleSubmit}
+							disabled={!canProceed || !ruleName}>
+							Add Rule
+						</Button>
 					</div>
-
-					<Separator />
-
-					<div>
-						<h3 className='text-lg font-semibold mb-2'>Compulsory Fields</h3>
-						<div className='grid grid-cols-2 gap-4'>
-							<FormField
-								control={form.control}
-								name='direction'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Direction</FormLabel>
-										<Select
-											onValueChange={field.onChange}
-											defaultValue={field.value}>
-											<FormControl>
-												<SelectTrigger>
-													<SelectValue placeholder='Select direction' />
-												</SelectTrigger>
-											</FormControl>
-											<SelectContent>
-												<SelectItem value='inbound'>Inbound</SelectItem>
-												<SelectItem value='outbound'>Outbound</SelectItem>
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name='description'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Description</FormLabel>
-										<FormControl>
-											<Input {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name='action'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Action</FormLabel>
-										<Select
-											onValueChange={field.onChange}
-											defaultValue={field.value}>
-											<FormControl>
-												<SelectTrigger>
-													<SelectValue placeholder='Select action' />
-												</SelectTrigger>
-											</FormControl>
-											<SelectContent>
-												<SelectItem value='allow'>Allow</SelectItem>
-												<SelectItem value='block'>Block</SelectItem>
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name='endTime'
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>End Time</FormLabel>
-										<FormControl>
-											<Input
-												type='datetime-local'
-												{...field}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</div>
-					</div>
-
-					<Button type='submit'>Add Rule</Button>
-				</form>
-			</Form>
-		</div>
+				</div>
+			</DialogContent>
+		</Dialog>
 	);
 }
