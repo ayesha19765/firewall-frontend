@@ -5,6 +5,7 @@ import PageTitle from "@/components/PageTitle";
 import Card, { CardContent, CardProps } from "@/components/Card";
 import AgentsTable from "@/components/AgentsTable";
 import MlAlerts from "@/components/MlAlerts";
+import RulesAlerts from "@/components/RulesAlerts";
 import DonutChart from "@/components/DonutChart";
 import LineChart from "@/components/LineChart";
 import DashboardCards from "@/components/DashboardCards"; // Import DashboardCards component
@@ -107,17 +108,11 @@ import axios from "axios";
 const cardData: CardProps[] = [
 	// Your card data here...
 ];
-const coordinates = [
-	{ lat: 23.0225, lng: 72.5714, label: "Ahemdabad" },
-	{ lat: 23.0236, lng: 72.5734, label: "Ahemdabad" },
-	{ lat: 23.0257, lng: 72.5814, label: "Ahemdabad" },
-	{ lat: 23.0268, lng: 72.5794, label: "Ahemdabad" },
-	{ lat: 23.0289, lng: 72.5614, label: "Ahemdabad" },
-];
 const email = "admin@mail.com";
 
 export default function Home() {
 	const [clientData, setClientData] = useState();
+	const [coordinates, setCoordinates] = useState([]);
 	let admin = useUserStore((state) => state.user);
 	if (admin == null) admin = JSON.parse(localStorage.getItem("admin"));
 
@@ -126,7 +121,7 @@ export default function Home() {
 			const clientDataArray = [];
 			for (let i = 0; i < admin?.clientID.length; i++) {
 				const element = admin?.clientID[i];
-				const a = await axios.post("http://localhost:3000/resend/client", {
+				const a = await axios.post("http://localhost:3000/details/client", {
 					clientID: element,
 				});
 				if (a.data.error) {
@@ -149,18 +144,17 @@ export default function Home() {
 		func();
 	}, []);
 	useEffect(() => {
-		console.log(clientData);
 		const fetchCoordinates = async () => {
-			if (!clientData?.length) return;
-
+			if (!clientData.length) return;
 			const coordinatesArray = await Promise.all(
 				clientData.map(async (client) => {
+					// console.log(, "ss");
 					try {
 						const response = await axios.get(
-							`http://ip-api.com/json/${client.public_ip}`
+							`http://ip-api.com/json/${client.device_info.public_ip}`
 						);
 						const { lat, lon } = response.data;
-						return { lat, lng: lon, label: client.device_name || "Unknown" };
+						return { lat, lng: lon, label: client.device_info.device_name || "Unknown" };
 					} catch (error) {
 						console.error(
 							`Error fetching coordinates for IP ${client.public_ip}:`,
@@ -171,12 +165,13 @@ export default function Home() {
 				})
 			);
 
-			setCoordinates(coordinatesArray.filter(Boolean)); // Filter out null responses
+			const filteredCoordinates = coordinatesArray.filter(Boolean); // Remove nulls
+			setCoordinates(filteredCoordinates);
+			console.log("Updated Coordinates:", filteredCoordinates);
 		};
 
 		fetchCoordinates();
-	}, [clientData]);
-
+	}, [clientData]); // Runs when clientData updates
 	return (
 		<div className='flex flex-col gap-4 w-full text-sm'>
 			<div>Dashboard - {admin?.email}</div>
@@ -243,8 +238,9 @@ export default function Home() {
 			</section>
 			<section className='w-[85vw] md:w-full'>
 				<CardContent>
-					<p className='p-4 font-semibold'>ML Model notifications</p>
-					<MlAlerts />
+					<p className='p-4 font-semibold'>Rule Alerts</p>
+					{/* <MlAlerts /> */}
+					<RulesAlerts />
 				</CardContent>
 			</section>
 		</div>
