@@ -1,43 +1,126 @@
-import React from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
-
-const customIcon = L.icon({
-	iconUrl: "./location-dot-solid.svg", // Replace with your custom image path
-	iconSize: [30, 50], // Adjust icon size
-	iconAnchor: [15, 50], // Position of the icon's anchor
-	popupAnchor: [0, -40], // Position of the popup relative to the icon
-
-	shadowSize: [50, 50], // Adjust shadow size
-});
+import React, { useEffect, useRef, useState } from "react";
+import "ol/ol.css";
+import { Map, View } from "ol";
+import TileLayer from "ol/layer/Tile";
+import OSM from "ol/source/OSM";
+import { fromLonLat } from "ol/proj";
+import Feature from "ol/Feature";
+import Point from "ol/geom/Point";
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
+import Style from "ol/style/Style";
+import Icon from "ol/style/Icon";
+import Overlay from "ol/Overlay";
+import Cluster from "ol/source/Cluster"; // Import the Cluster source
 
 const MapComponent = ({ coordinates }) => {
-	const defaultCenter = { lat: 23.0225, lng: 72.5714 }; // Fallback center
+  const mapRef = useRef();
+  const [hoveredFeature, setHoveredFeature] = useState(null);
 
-	return (
-		<MapContainer
-			center={[defaultCenter.lat, defaultCenter.lng]}
-			zoom={10}
-			className='-z-10 flex justify-center items-center'
-			style={{ height: "45vh", width: "full" }}>
-			<TileLayer
-				url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-				attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-			/>
+  useEffect(() => {
+    const vectorSource = new VectorSource();
+    const markerFeatures = [];
 
-			{/* Loop through coordinates and add markers */}
-			{coordinates.map((coord, index) =>
-				coord.lat && coord.lng ? (
-					<Marker
-						key={coord.lat}
-						position={[coord.lat, coord.lng]}
-						icon={customIcon}>
-						<Popup>{coord.label || "No label provided"}</Popup>
-					</Marker>
-				) : null
-			)}
-		</MapContainer>
-	);
+    coordinates.forEach(({ lat, lng, label }) => {
+      const marker = new Feature({
+        geometry: new Point(fromLonLat([lng, lat])),
+        name: label || "No label provided",
+      });
+
+      marker.setStyle(
+        new Style({
+          image: new Icon({
+            anchor: [0.5, 1],
+            src: "https://cdn-icons-png.flaticon.com/512/684/684908.png", // Custom icon URL
+            scale: 0.1, // Adjust scale for better visibility
+          }),
+        })
+      );
+
+      vectorSource.addFeature(marker);
+      markerFeatures.push(marker);
+    });
+
+    // Create a cluster source
+    const clusterSource = new Cluster({
+      distance: 40,
+      source: vectorSource,
+    });
+
+    const vectorLayer = new VectorLayer({
+      source: clusterSource,
+      style: function (feature) {
+        // Apply different styles for clusters and individual markers
+        const size = feature.get("features") ? feature.get("features").length : 1;
+        if (size === 1) {
+          // Return the custom icon for individual markers
+          return new Style({
+            image: new Icon({
+              anchor: [0.5, 1],
+              src: "https://cdn-icons-png.flaticon.com/512/684/684908.png", // Custom icon URL
+              scale: 0.1,
+            }),
+          });
+        } else {
+          // Optionally, apply a different style for clusters (e.g., a circle)
+          return new Style({
+            image: new Icon({
+              anchor: [0.5, 1],
+              src: "https://cdn-icons-png.flaticon.com/512/684/684908.png", // Cluster icon, or you can apply a circle or another icon
+              scale: 0.1, // Adjust scale for better visibility
+            }),
+          });
+        }
+      },
+    });
+
+    const map = new Map({
+      target: mapRef.current,
+      layers: [
+        new TileLayer({
+          source: new OSM(),
+        }),
+        vectorLayer,
+      ],
+      view: new View({
+        center: fromLonLat([0, 0]),
+        zoom: 2,
+      }),
+    });
+
+    // Tooltip setup for displaying names
+    const tooltip = new Overlay({
+      element: document.createElement("div"),
+      positioning: "bottom-center",
+      offset: [0, -20],
+    });
+
+    map.addOverlay(tooltip);
+
+    // Handle hover event for tooltips
+    map.on("pointermove", (event) => {
+      const feature = map.forEachFeatureAtPixel(event.pixel, (feat) => feat);
+
+      if (feature) {
+        const cluster = feature.get("features");
+        if (cluster) {
+          const names = cluster
+            .map((f) => f.get("name"))
+            .filter((name, index, self) => self.indexOf(name) === index) // Unique names
+            .join(", ");
+          tooltip.getElement().innerHTML = names;
+          tooltip.setPosition(event.coordinate);
+          tooltip.getElement().style.display = "block";
+        }
+      } else {
+        tooltip.getElement().style.display = "none";
+      }
+    });
+
+    return () => map.setTarget(null);
+  }, [coordinates]);
+
+  return <div ref={mapRef} style={{ height: "50vh", width: "100%" }} />;
 };
 
 export default MapComponent;
