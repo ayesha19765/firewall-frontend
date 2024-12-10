@@ -111,7 +111,8 @@ export const useUserStore = create<UserState>((set) => ({
 				});
 				console.log(name, email, adminID, clientID);
 			} else {
-				set({ error: response.data.message });
+				console.log(error);
+				set({ error: response });
 				toast({
 					title: response.data.message,
 					description: "User registered error.",
@@ -120,7 +121,7 @@ export const useUserStore = create<UserState>((set) => ({
 		} catch (error: any) {
 			set({ error: "An error occurred. Please try again." });
 			toast({
-				title: error?.response?.data?.message,
+				title: error?.response,
 				description: "Probelm while looging in",
 			});
 		} finally {

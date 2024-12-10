@@ -46,15 +46,15 @@ export default function Blocks() {
 				</div>
 			</div>
 
-			<div className='grid grid-cols-12 gap-6'>
-				<div className='col-span-3'>
+			<div className='grid grid-cols-12 gap-6 w-[70vw]'>
+				<div className='col-span-3 w-[20%]'>
 					<BlocksFilter
 						filters={filters}
 						onFiltersChange={setFilters}
 					/>
 				</div>
 
-				<div className='col-span-7'>
+				<div className='col-span-7 w-[100%]'>
 					<BlocksTable
 						rules={rules}
 						onStatusChange={(id, status) => {
@@ -67,7 +67,7 @@ export default function Blocks() {
 					/>
 				</div>
 
-				<div className='col-span-2'>
+				<div className='col-span-2 w-[20%]'>
 					<BlocksSort
 						value={sortBy}
 						onValueChange={setSortBy}

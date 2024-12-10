@@ -13,6 +13,7 @@ import Map from "@/components/Map";
 import { useUserStore } from "@/lib/store/userStore";
 import axios from "axios";
 import AlertsChart from "@/components/AlertsChart";
+import { useRouter } from "next/navigation";
 
 const cardData: CardProps[] = [
 	// Your card data here...
@@ -27,33 +28,37 @@ const coordinates = [
 const email = "admin@mail.com";
 
 export default function Home() {
+	const router = useRouter();
 	const [clientData, setClientData] = useState();
+	const [coorffdinates, setCoordinates] = useState();
 	let admin = useUserStore((state) => state.user);
 	if (admin == null) admin = JSON.parse(localStorage.getItem("admin"));
+
+	if (!admin) router.push("/login");
 
 	useEffect(() => {
 		const func = async () => {
 			const clientDataArray = [];
-			for (let i = 0; i < admin?.clientID.length; i++) {
-				const element = admin?.clientID[i];
-				const a = await axios.post("http://localhost:3000/resend/client", {
-					clientID: element,
-				});
-				if (a.data.error) {
-					const array = [];
-					array.push(element);
-					const a = await axios.post("http://localhost:3000/details/clients", {
-						clientIDS: array,
-					});
-					const date = new Date().toISOString();
-					const newData = { ...a.data.data[0], last_ping: date };
-					clientDataArray.push(newData);
-				} else {
-					const date = new Date().toISOString();
-					const newData = { ...a.data.data[0], last_ping: date };
-					clientDataArray.push(newData);
-				}
-			}
+			// for (let i = 0; i < admin?.clientID.length; i++) {
+			// const element = admin?.clientID[i];
+			// const a = await axios.post("http://localhost:3000/resend/client", {
+			// 	clientID: element,
+			// });
+			// if (a.data.error) {
+			// const array = [];
+			// array.push(element);
+			const a = await axios.post("http://localhost:3000/details/clients", {
+				clientIDS: admin?.clientID,
+			});
+			const date = new Date().toISOString();
+			const newData = { ...a.data.data[0], last_ping: date };
+			clientDataArray.push(newData);
+			// } else {
+			// 	const date = new Date().toISOString();
+			// 	const newData = { ...a.data.data[0], last_ping: date };
+			// 	clientDataArray.push(newData);
+			// }
+			// }
 			setClientData(clientDataArray);
 		};
 		func();

@@ -60,7 +60,7 @@ export default function SideNavbar({}: Props) {
 						variant: "ghost",
 					},
 					{
-						title: "Add Rules",
+						title: "Rules",
 						href: "/rules",
 						icon: PlusCircle,
 						variant: "ghost",
