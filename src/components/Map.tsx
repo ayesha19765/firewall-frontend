@@ -13,6 +13,7 @@ const customIcon = L.icon({
 
 const MapComponent = ({ coordinates }) => {
 	const defaultCenter = { lat: 23.0225, lng: 72.5714 }; // Fallback center
+	// console.log(coordinates);
 
 	return (
 		<MapContainer

@@ -120,11 +120,9 @@ export default function Home() {
 	const [clientData, setClientData] = useState();
 	let admin = useUserStore((state) => state.user);
 	if (admin == null) admin = JSON.parse(localStorage.getItem("admin"));
-	console.log(admin);
 
 	useEffect(() => {
 		const func = async () => {
-			console.log(admin);
 			const clientDataArray = [];
 			for (let i = 0; i < admin?.clientID.length; i++) {
 				const element = admin?.clientID[i];
@@ -140,22 +138,20 @@ export default function Home() {
 					const date = new Date().toISOString();
 					const newData = { ...a.data.data[0], last_ping: date };
 					clientDataArray.push(newData);
-					console.log(newData);
 				} else {
 					const date = new Date().toISOString();
 					const newData = { ...a.data.data[0], last_ping: date };
 					clientDataArray.push(newData);
-					console.log(newData);
 				}
 			}
 			setClientData(clientDataArray);
 		};
 		func();
-	}, [admin?.clientID]);
+	}, []);
 	useEffect(() => {
 		console.log(clientData);
 		const fetchCoordinates = async () => {
-			if (!clientData.length) return;
+			if (!clientData?.length) return;
 
 			const coordinatesArray = await Promise.all(
 				clientData.map(async (client) => {
@@ -174,16 +170,12 @@ export default function Home() {
 					}
 				})
 			);
-			console.log("Coordinates:", coordinates);
 
 			setCoordinates(coordinatesArray.filter(Boolean)); // Filter out null responses
 		};
 
 		fetchCoordinates();
 	}, [clientData]);
-	useEffect(() => {
-		console.log("Coordinates:", coordinates);
-	}, [coordinates]);
 
 	return (
 		<div className='flex flex-col gap-4 w-full text-sm'>

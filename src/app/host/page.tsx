@@ -5,30 +5,46 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import axios from "axios";
+import { useUserStore } from "@/lib/store/userStore";
 
 export default function HostsOverall() {
-	const [activeClients, setActiveClients] = useState();
-	const [inactiveClients, setInactiveClients] = useState();
+	const [activeClients, setActiveClients] = useState<string[]>([]);
+	const [inactiveClients, setInactiveClients] = useState<string[]>([]);
+	const [overallData, setOverallData] = useState([]);
 	const [adminEmail, setAdminEmail] = useState<string>("");
 	const router = useRouter();
+	const admino = useUserStore((state) => state.user);
+	const emailo = JSON.parse(localStorage.getItem("admin"));
 
 	useEffect(() => {
-		// Fetch hosts and admin email from your backend API
 		const fetchData = async () => {
 			try {
-				const hostsResponse = await axios.post(
-					"http://localhost:3000/details/admin"
+				console.log(emailo);
+				const adminResponse = await axios.post(
+					"http://localhost:3000/details/admin",
+					{
+						email: emailo.email,
+					}
 				);
-				const activeClients = await hostsResponse.data.activeClients;
-				const inactiveClients = await hostsResponse.data.admin.clientID;
+				const { activeClients, admin } = adminResponse.data;
+				setActiveClients(activeClients);
+				setInactiveClients(admin?.clientID);
 
-				const adminResponse = await fetch("/api/admin");
-				const adminData = await adminResponse.json();
-				setAdminEmail(adminData.email);
+				const allClientIds = [...activeClients, ...admin.clientID];
+				const clientsResponse = await axios.post(
+					"http://localhost:3000/details/clients",
+					{
+						clientIDS: allClientIds,
+					}
+				);
+				console.log("Overadcdcll", clientsResponse);
+
+				setOverallData(clientsResponse.data.data);
 			} catch (error) {
 				console.error("Error fetching data:", error);
 			}
 		};
+		console.log("****************88");
 
 		fetchData();
 	}, []);
@@ -37,19 +53,38 @@ export default function HostsOverall() {
 		router.push(`/host/${clientId}`);
 	};
 
-	const HostCard = ({ host }: { host: Host }) => (
+	const HostCard = ({ clientData }: any) => (
 		<Card
 			className='mb-4 cursor-pointer hover:shadow-md transition-shadow'
-			onClick={() => navigateToHost(host.id)}>
+			onClick={() => navigateToHost(clientData?.clientID)}>
 			<CardHeader>
-				<CardTitle>{host.deviceName}</CardTitle>
+				<CardTitle>{clientData?.device_info?.device_name}</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<p>IP: {host.ip}</p>
-				<p>OS: {host.os}</p>
+				<p>IP: {clientData?.device_info?.public_ip}</p>
+				<p>OS: {clientData?.device_info?.os}</p>
 			</CardContent>
 		</Card>
 	);
+
+	const renderHosts = (isActive: boolean) => {
+		const clientIds = isActive ? activeClients : inactiveClients;
+
+		return clientIds?.map((clientId) => {
+			const clientData = overallData?.find(
+				(data) => data.clientID === clientId
+			);
+			if (clientData) {
+				return (
+					<HostCard
+						key={clientId}
+						clientData={clientData}
+					/>
+				);
+			}
+			return null;
+		});
+	};
 
 	return (
 		<div className='p-6'>
@@ -63,14 +98,7 @@ export default function HostsOverall() {
 						Active Hosts
 					</h2>
 					<ScrollArea className='h-[calc(100vh-200px)]'>
-						{hosts
-							.filter((host) => host.isActive)
-							.map((host) => (
-								<HostCard
-									key={host.id}
-									host={host}
-								/>
-							))}
+						{renderHosts(true)}
 					</ScrollArea>
 				</div>
 
@@ -80,14 +108,7 @@ export default function HostsOverall() {
 						Inactive Hosts
 					</h2>
 					<ScrollArea className='h-[calc(100vh-200px)]'>
-						{hosts
-							.filter((host) => !host.isActive)
-							.map((host) => (
-								<HostCard
-									key={host.id}
-									host={host}
-								/>
-							))}
+						{renderHosts(false)}
 					</ScrollArea>
 				</div>
 			</div>
