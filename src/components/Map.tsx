@@ -14,33 +14,6 @@ import Overlay from "ol/Overlay";
 import Cluster from "ol/source/Cluster"; // Import the Cluster source
 
 const MapComponent = ({ coordinates }) => {
-	const defaultCenter = { lat: 23.0225, lng: 72.5714 }; // Fallback center
-	// console.log(coordinates);
-
-	return (
-		<MapContainer
-			center={[defaultCenter.lat, defaultCenter.lng]}
-			zoom={10}
-			className='-z-10 flex justify-center items-center'
-			style={{ height: "45vh", width: "full" }}>
-			<TileLayer
-				url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-				attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-			/>
-
-			{/* Loop through coordinates and add markers */}
-			{coordinates.map((coord, index) =>
-				coord.lat && coord.lng ? (
-					<Marker
-						key={coord.lat}
-						position={[coord.lat, coord.lng]}
-						icon={customIcon}>
-						<Popup>{coord.label || "No label provided"}</Popup>
-					</Marker>
-				) : null
-			)}
-		</MapContainer>
-	);
 	const mapRef = useRef();
 	const [hoveredFeature, setHoveredFeature] = useState(null);
 
@@ -112,8 +85,8 @@ const MapComponent = ({ coordinates }) => {
 				vectorLayer,
 			],
 			view: new View({
-				center: fromLonLat([0, 0]),
-				zoom: 2,
+				center: fromLonLat([72.5714, 23.0225]),
+				zoom: 6,
 			}),
 		});
 
