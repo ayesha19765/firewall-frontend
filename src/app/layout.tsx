@@ -26,9 +26,9 @@ export default function RootLayout({
 				className={cn(
 					"min-h-screen w-full bg-white text-black flex text-sm",
 					inter.className,
-					{
-						"debug-screens": process.env.NODE_ENV === "development",
-					}
+					// {
+					// 	"debug-screens": process.env.NODE_ENV === "development",
+					// }
 				)}>
 				{/* Conditionally render sidebar */}
 				<div className='w-[#100vw]'>

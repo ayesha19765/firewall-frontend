@@ -79,7 +79,7 @@ export default function Home() {
 
 	useEffect(() => {
 		const fetchCoordinates = async () => {
-			if (!clientData.length) return;
+			if (!clientData?.length) return;
 			const coordinatesArray = await Promise.all(
 				clientData.map(async (client) => {
 					// console.log(, "ss");
@@ -189,3 +189,16 @@ export default function Home() {
 		</div>
 	);
 }
+/*
+login
+signup
+host
+rules
+
+add-rule
+log
+profile
+settings
+treeview2
+users
+*/
