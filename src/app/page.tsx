@@ -45,19 +45,31 @@ export default function Home() {
 			// if (a.data.error) {
 			// const array = [];
 			// array.push(element);
-			const a = await axios.post("http://localhost:3000/details/clients", {
-				clientIDS: admin?.clientID,
-			});
-			const date = new Date().toISOString();
-			const newData = { ...a.data.data[0], last_ping: date };
-			clientDataArray.push(newData);
+			// const a = await axios.post("http://localhost:3000/details/clients", {
+			// 	clientIDS: admin?.clientID,
+			// });
+			try {
+				const a = await axios.post("http://localhost:3000/details/clients", {
+					clientIDS: admin?.clientID,
+				});
+				const date = new Date().toISOString();
+				const newData = { ...a.data.data[0], last_ping: date };
+				clientDataArray.push(newData);
+				setClientData(clientDataArray);
+				console.log(a.data);
+			} catch (error) {
+				console.error(
+					"Error posting to /details/clients:",
+					error.response?.data || error.message
+				);
+			}
+
 			// } else {
 			// 	const date = new Date().toISOString();
 			// 	const newData = { ...a.data.data[0], last_ping: date };
 			// 	clientDataArray.push(newData);
 			// }
 			// }
-			setClientData(clientDataArray);
 		};
 		func();
 	}, []);
@@ -85,7 +97,7 @@ export default function Home() {
 
 	useEffect(() => {
 		const fetchCoordinates = async () => {
-			if (!clientData.length) return;
+			if (!clientData?.length) return;
 			const coordinatesArray = await Promise.all(
 				clientData.map(async (client) => {
 					// console.log(, "ss");
@@ -117,11 +129,11 @@ export default function Home() {
 		fetchCoordinates();
 	}, [clientData]); // Runs when clientData updates
 	return (
-		<div className='flex flex-col gap-4 w-full text-sm'>
+		<div className="flex flex-col gap-4 w-full text-sm">
 			<div>Dashboard - {admin?.email}</div>
 
 			{/* Cards Section */}
-			<section className='grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4'>
+			<section className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 				{cardData.map((d, i) => (
 					<Card
 						key={i}
@@ -134,11 +146,11 @@ export default function Home() {
 			</section>
 
 			{/* Top Row: Donut Chart, Summary Card, Line Chart */}
-			<section className='grid w-[85vw] md:w-full gap-4 grid-cols-1 md:grid-cols-3'>
+			<section className="grid w-[85vw] md:w-full gap-4 grid-cols-1 md:grid-cols-3">
 				{/* Donut Chart */}
-				<div className='flex-1'>
+				<div className="flex-1">
 					<CardContent>
-						<p className='font-semibold'>Connection Status</p>
+						<p className="font-semibold">Connection Status</p>
 						<DonutChart
 							activeConnectionsNo={activeClients?.length ?? 0}
 							inactiveConnectionsNo={
@@ -150,13 +162,13 @@ export default function Home() {
 
 				<div>
 					<CardContent>
-						<p className='font-semibold'>Location of connected hosts</p>
+						<p className="font-semibold">Location of connected hosts</p>
 						<AlertsChart />
 					</CardContent>
 				</div>
 				<div>
 					<CardContent>
-						<p className='font-semibold'>Location of connected hosts</p>
+						<p className="font-semibold">Location of connected hosts</p>
 						<Map coordinates={coordinates} />
 					</CardContent>
 				</div>
@@ -179,15 +191,15 @@ export default function Home() {
 			</section>
 
 			{/* Full-width Agents Table */}
-			<section className='w-[85vw] md:w-full'>
+			<section className="w-[85vw] md:w-full">
 				<CardContent>
-					<p className='p-4 font-semibold'>Overview</p>
+					<p className="p-4 font-semibold">Overview</p>
 					<AgentsTable clientData={clientData} />
 				</CardContent>
 			</section>
-			<section className='w-[85vw] md:w-full'>
+			<section className="w-[85vw] md:w-full">
 				<CardContent>
-					<p className='p-4 font-semibold'>Rule Alerts</p>
+					<p className="p-4 font-semibold">Rule Alerts</p>
 					{/* <MlAlerts /> */}
 					<RulesAlerts />
 				</CardContent>
@@ -195,3 +207,16 @@ export default function Home() {
 		</div>
 	);
 }
+/*
+login
+signup
+host
+rules
+
+add-rule
+log
+profile
+settings
+treeview2
+users
+*/
