@@ -30,7 +30,7 @@ export default function Home() {
 
 	// const [clientData, setClientData] = useState();
 	// const [adminData, setAdminData] = useState();
-
+	
 	useEffect(() => {
 		const adminEmail = JSON.parse(localStorage.getItem("adminEmail"));
 		// if (!adminEmail) router.push("/login");
@@ -48,21 +48,53 @@ export default function Home() {
 				"clientDetails",
 				JSON.stringify(response.data.clientDetails)
 			);
+			localStorage.setItem("activeConnectionsNo", JSON.stringify(5));
+			localStorage.setItem("inactiveConnectionsNo", JSON.stringify(3));
 		};
 		fetchDetails();
 	}, []);
-
 	const adminData = JSON.parse(localStorage.getItem("adminDetails"));
 	const clientData = JSON.parse(localStorage.getItem("clientDetails"));
 	const activeClients = JSON.parse(localStorage.getItem("activeClients"));
 	const inactiveClients = [];
+	useEffect(() => {
+		const fetchCoordinates = async () => {
+			if (!clientData?.length) return;
+			const coordinatesArray = await Promise.all(
+				clientData.map(async (client) => {
+					try {
+						const response = await axios.get(
+							`http://ip-api.com/json/${client.device_info.public_ip}`
+						);
+						const { lat, lon } = response.data;
+						return {
+							lat,
+							lng: lon,
+							label: client.device_info.device_name || "Unknown",
+						};
+					} catch (error) {
+						console.error(
+							`Error fetching coordinates for IP ${client.public_ip}:`,
+							error
+						);
+						return null;
+					}
+				})
+			);
+
+			const filteredCoordinates = coordinatesArray.filter(Boolean); // Remove nulls
+			setCoordinates(filteredCoordinates);
+		};
+
+		fetchCoordinates();
+	}, [clientData]);
 
 	return (
-		<div className='flex flex-col gap-4 w-full text-sm'>
+		<div className="flex flex-col gap-4 w-full text-sm">
 			<div>Dashboard - {adminData?.email}</div>
 
 			{/* Cards Section */}
-			<section className='grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4'>
+			<section className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 				{cardData.map((d, i) => (
 					<Card
 						key={i}
@@ -75,11 +107,11 @@ export default function Home() {
 			</section>
 
 			{/* Top Row: Donut Chart, Summary Card, Line Chart */}
-			<section className='grid w-[85vw] md:w-full gap-4 grid-cols-1 md:grid-cols-3'>
+			<section className="grid w-[85vw] md:w-full gap-4 grid-cols-1 md:grid-cols-3">
 				{/* Donut Chart */}
-				<div className='flex-1'>
+				<div className="flex-1">
 					<CardContent>
-						<p className='font-semibold'>Connection Status</p>
+						<p className="font-semibold">Connection Status</p>
 						<DonutChart
 							activeConnectionsNo={activeClients?.length ?? 0}
 							inactiveConnectionsNo={
@@ -91,13 +123,13 @@ export default function Home() {
 
 				<div>
 					<CardContent>
-						<p className='font-semibold'>Location of connected hosts</p>
+						<p className="font-semibold">Location of connected hosts</p>
 						<AlertsChart />
 					</CardContent>
 				</div>
 				<div>
 					<CardContent>
-						<p className='font-semibold'>Location of connected hosts</p>
+						<p className="font-semibold">Location of connected hosts</p>
 						<Map coordinates={coordinates} />
 					</CardContent>
 				</div>
@@ -120,15 +152,15 @@ export default function Home() {
 			</section>
 
 			{/* Full-width Agents Table */}
-			<section className='w-[85vw] md:w-full'>
+			<section className="w-[85vw] md:w-full">
 				<CardContent>
-					<p className='p-4 font-semibold'>Overview</p>
+					<p className="p-4 font-semibold">Overview</p>
 					<AgentsTable />
 				</CardContent>
 			</section>
-			<section className='w-[85vw] md:w-full'>
+			<section className="w-[85vw] md:w-full">
 				<CardContent>
-					<p className='p-4 font-semibold'>Rule Alerts</p>
+					<p className="p-4 font-semibold">Rule Alerts</p>
 					{/* <MlAlerts /> */}
 					<RulesAlerts />
 				</CardContent>
@@ -148,4 +180,7 @@ profile
 settings
 treeview2
 users
+*/
+/*
+
 */

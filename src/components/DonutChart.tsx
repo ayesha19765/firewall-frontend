@@ -1,19 +1,35 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from "chart.js";
 
 // Register required components
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
-const DonutChart = ({ activeConnectionsNo, inactiveConnectionsNo }) => {
-	// Chart data using props
-	const data = {
+const DonutChart = () => {
+	const [data, setData] = useState({
+		activeConnectionsNo: 50, // Default value
+		inactiveConnectionsNo: 30, // Default value
+	});
+
+	// Load data from localStorage
+	useEffect(() => {
+		const storedActive = localStorage.getItem("activeConnectionsNo");
+		const storedInactive = localStorage.getItem("inactiveConnectionsNo");
+
+		setData({
+			activeConnectionsNo: parseInt(storedActive, 10) || 5, // Default if null
+			inactiveConnectionsNo: parseInt(storedInactive, 10) || 3, // Default if null
+		});
+	}, []);
+
+	// Chart data using state
+	const chartData = {
 		labels: ["Active", "Inactive"],
 		datasets: [
 			{
-				data: [activeConnectionsNo, inactiveConnectionsNo],
+				data: [data.activeConnectionsNo, data.inactiveConnectionsNo],
 				backgroundColor: ["#0088FE", "#FF8042"],
 				borderWidth: 0,
 			},
@@ -24,7 +40,7 @@ const DonutChart = ({ activeConnectionsNo, inactiveConnectionsNo }) => {
 		responsive: true,
 		plugins: {
 			legend: {
-				display: false, // Hide the built-in legend
+				display: false,
 			},
 			tooltip: {
 				callbacks: {
@@ -61,7 +77,7 @@ const DonutChart = ({ activeConnectionsNo, inactiveConnectionsNo }) => {
 				}}>
 				<div style={{ width: "70%", height: "70%" }}>
 					<Doughnut
-						data={data}
+						data={chartData}
 						options={options}
 					/>
 				</div>
@@ -74,7 +90,7 @@ const DonutChart = ({ activeConnectionsNo, inactiveConnectionsNo }) => {
 					justifyContent: "flex-start",
 					alignItems: "flex-start",
 				}}>
-				{data.labels.map((label, index) => (
+				{chartData.labels.map((label, index) => (
 					<div
 						key={label}
 						style={{
@@ -86,11 +102,11 @@ const DonutChart = ({ activeConnectionsNo, inactiveConnectionsNo }) => {
 							style={{
 								width: "12px",
 								height: "12px",
-								backgroundColor: data.datasets[0].backgroundColor[index],
+								backgroundColor: chartData.datasets[0].backgroundColor[index],
 								marginRight: "8px",
 							}}></div>
 						<span style={{ fontSize: "12px" }}>
-							{label}: {data.datasets[0].data[index]}
+							{label}: {chartData.datasets[0].data[index]}
 						</span>
 					</div>
 				))}
