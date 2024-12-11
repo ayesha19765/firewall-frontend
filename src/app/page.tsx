@@ -43,20 +43,27 @@ export default function Home() {
 				"clientDetails",
 				JSON.stringify(response.data.clientDetails)
 			);
-			localStorage.setItem("activeConnectionsNo", JSON.stringify(5));
-			localStorage.setItem("inactiveConnectionsNo", JSON.stringify(3));
+			// localStorage.setItem("activeConnectionsNo", JSON.stringify(5));
+			// localStorage.setItem("inactiveConnectionsNo", JSON.stringify(3));
 		};
 		fetchDetails();
 	}, []);
 	const adminData = JSON.parse(localStorage.getItem("adminDetails"));
 	const clientData = JSON.parse(localStorage.getItem("clientDetails"));
 	const activeClients = JSON.parse(localStorage.getItem("activeClients"));
-	const inactiveClients = [];
+	const inactiveClients = adminData?.clientID?.filter(
+		(clientID) => !activeClients?.includes(clientID)
+	);
 	useEffect(() => {
 		const fetchCoordinates = async () => {
 			if (!clientData?.length) return;
+
+			const activeClientData = clientData.filter((client) =>
+				activeClients.includes(client.clientID)
+			);
+
 			const coordinatesArray = await Promise.all(
-				clientData.map(async (client) => {
+				activeClientData.map(async (client) => {
 					try {
 						const response = await axios.get(
 							`http://ip-api.com/json/${client.device_info.public_ip}`
@@ -69,7 +76,7 @@ export default function Home() {
 						};
 					} catch (error) {
 						console.error(
-							`Error fetching coordinates for IP ${client.public_ip}:`,
+							`Error fetching coordinates for IP ${client.device_info.public_ip}:`,
 							error
 						);
 						return null;
@@ -77,12 +84,16 @@ export default function Home() {
 				})
 			);
 
-			const filteredCoordinates = coordinatesArray.filter(Boolean); // Remove nulls
-			setCoordinates(filteredCoordinates);
+			const filteredCoordinates = coordinatesArray.filter(Boolean);
+
+			// Only update state if the coordinates have changed
+			if (JSON.stringify(filteredCoordinates) !== JSON.stringify(coordinates)) {
+				setCoordinates(filteredCoordinates);
+			}
 		};
 
 		fetchCoordinates();
-	}, [clientData]);
+	}, [clientData, activeClients, coordinates]); // Added coordinates to the dependencies to prevent infinite loop
 
 	return (
 		<div className='flex flex-col gap-4 w-full text-sm'>
@@ -109,9 +120,7 @@ export default function Home() {
 						<p className='font-semibold'>Connection Status</p>
 						<DonutChart
 							activeConnectionsNo={activeClients?.length ?? 0}
-							inactiveConnectionsNo={
-								(inactiveClients?.length ?? 0) - (activeClients?.length ?? 0)
-							}
+							inactiveConnectionsNo={inactiveClients?.length ?? 0}
 						/>
 					</CardContent>
 				</div>

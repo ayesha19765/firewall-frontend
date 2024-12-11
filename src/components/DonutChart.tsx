@@ -7,40 +7,25 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from "chart.js";
 // Register required components
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
-const DonutChart = () => {
-	const [data, setData] = useState({
-		activeConnectionsNo: 50, // Default value
-		inactiveConnectionsNo: 30, // Default value
-	});
-
-	// Load data from localStorage
-	useEffect(() => {
-		const storedActive = localStorage.getItem("activeConnectionsNo");
-		const storedInactive = localStorage.getItem("inactiveConnectionsNo");
-
-		setData({
-			activeConnectionsNo: parseInt(storedActive, 10) || 5, // Default if null
-			inactiveConnectionsNo: parseInt(storedInactive, 10) || 3, // Default if null
-		});
-	}, []);
-
-	// Chart data using state
+const DonutChart = ({ activeConnectionsNo, inactiveConnectionsNo }) => {
+	// Chart data using state to enable dynamic updates
 	const chartData = {
 		labels: ["Active", "Inactive"],
 		datasets: [
 			{
-				data: [data.activeConnectionsNo, data.inactiveConnectionsNo],
+				data: [activeConnectionsNo, inactiveConnectionsNo], // Corrected to use props
 				backgroundColor: ["#0088FE", "#FF8042"],
 				borderWidth: 0,
 			},
 		],
 	};
 
+	// Chart options
 	const options = {
 		responsive: true,
 		plugins: {
 			legend: {
-				display: false,
+				display: false, // Set to false if a custom legend is used
 			},
 			tooltip: {
 				callbacks: {
@@ -54,10 +39,10 @@ const DonutChart = () => {
 				},
 			},
 			title: {
-				display: false,
+				display: false, // Disable title for cleaner UI
 			},
 		},
-		cutout: "75%",
+		cutout: "75%", // Donut cutout percentage
 	};
 
 	return (
@@ -67,19 +52,18 @@ const DonutChart = () => {
 				width: "100%",
 				display: "flex",
 				alignItems: "center",
-			}}>
+			}}
+		>
 			<div
 				style={{
 					flex: "2",
 					display: "flex",
 					justifyContent: "center",
 					alignItems: "center",
-				}}>
+				}}
+			>
 				<div style={{ width: "70%", height: "70%" }}>
-					<Doughnut
-						data={chartData}
-						options={options}
-					/>
+					<Doughnut data={chartData} options={options} />
 				</div>
 			</div>
 			<div
@@ -89,7 +73,9 @@ const DonutChart = () => {
 					flexDirection: "column",
 					justifyContent: "flex-start",
 					alignItems: "flex-start",
-				}}>
+				}}
+			>
+				{/* Custom Legend */}
 				{chartData.labels.map((label, index) => (
 					<div
 						key={label}
@@ -97,14 +83,16 @@ const DonutChart = () => {
 							marginBottom: "8px",
 							display: "flex",
 							alignItems: "center",
-						}}>
+						}}
+					>
 						<div
 							style={{
 								width: "12px",
 								height: "12px",
 								backgroundColor: chartData.datasets[0].backgroundColor[index],
 								marginRight: "8px",
-							}}></div>
+							}}
+						></div>
 						<span style={{ fontSize: "12px" }}>
 							{label}: {chartData.datasets[0].data[index]}
 						</span>

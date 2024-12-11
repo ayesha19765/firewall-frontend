@@ -35,7 +35,7 @@ export default function NodesTable() {
 	const adminData = JSON.parse(localStorage.getItem("adminDetails"));
 	const clientData = JSON.parse(localStorage.getItem("clientDetails"));
 	const activeClients = JSON.parse(localStorage.getItem("activeClients"));
-	const inactiveClients = [];
+	// const inactiveClients = [];
 
 	return (
 		<div className='overflow-x-auto'>
