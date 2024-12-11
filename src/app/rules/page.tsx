@@ -13,31 +13,59 @@ import type { BlockRule, FilterOptions, SortOption } from "@/types/rules";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/lib/store/userStore";
-import useSocket from "@/lib/hooks/useSocket.tsx";
+import useSocket from "@/lib/hooks/useSocket";
 
 export default function Blocks() {
 	const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-	const serverURL = "http://localhost:3000"; // Replace with your actual server URL
-	// const socket = useSocket(serverURL);
+	const socket = useSocket();
+	const [rules, setRules] = useState([]);
+	const handleDeleteRule = async ({ clientID, appName, ruleName }) => {
+		const response = await axios.post(
+			`http://localhost:3000/rules/delete-rule`,
+			{
+				clientID,
+				appName,
+				ruleName,
+			}
+		);
+	};
+	const handleGetRules = async () => {
+		const response = await axios.get(
+			`http://localhost:3000/rules/get-rules-created-by-admin`
+		);
+		localStorage.setItem("admin_rules", JSON.stringify(response.data.rules));
+	};
 
-	// useEffect(() => {
-	// 	if (socket) {
-	// 		// Listen for events
-	// 		socket.on("message", (data) => {
-	// 			console.log("Received message:", data);
-	// 		});
+	useEffect(() => {
+		console.log("dfkjbdsnj");
+		handleGetRules();
 
-	// 		// Emit an event
-	// 		socket.emit("joinRoom", { room: "room1" });
-	// 	}
+		if (socket) {
+			console.log(socket);
+			console.log("ddsjfbjsndklsfnlasfkasbfkjds");
+			// Listen for events
 
-	// 	// Cleanup the listeners
-	// 	return () => {
-	// 		if (socket) {
-	// 			socket.off("message");
-	// 		}
-	// 	};
-	// }, [socket]);
+			socket.emit("message", {
+				"data ": localStorage,
+			});
+			socket.on("message", (data) => {
+				console.log("Received message:", data);
+			});
+			socket.on("get_rules", (data) => {
+				console.log(data);
+			});
+
+			// Emit an event
+			// socket.emit("joinRoom", { room: "room1" });
+		}
+
+		// Cleanup the listeners
+		return () => {
+			if (socket) {
+				socket.off("message");
+			}
+		};
+	}, [socket]);
 
 	return (
 		<div className='container mx-auto py-6 w-full'>

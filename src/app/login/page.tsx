@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image"; // Import Image component for optimized image loading
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
@@ -12,15 +12,15 @@ const Login: React.FC = () => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
-	// const [role, setRole] = useState("user"); // New state for role selection
-	const loginUser = useUserStore((state) => state.loginUser);
-	const error = useUserStore((state) => state.error);
-	const isLoading = useUserStore((state) => state.isLoading);
+	const [isLoading, setIsLoading] = useState(false);
 	const router = useRouter(); // Use router for navigation
 
-	let admin = useUserStore((state) => state.user);
+	useEffect(() => {
+		localStorage.clear();
+	}, []);
 
 	const handleLogin = async (e: React.FormEvent) => {
+		setIsLoading(true);
 		e.preventDefault();
 
 		const response = await axios.post("http://localhost:3000/admin/signin", {
@@ -67,34 +67,6 @@ const Login: React.FC = () => {
 						/>
 					</div>
 
-					{/* <div className='mb-4'>
-						<label className='block text-gray-700 text-sm font-bold mb-2'>
-							Role
-						</label>
-						<div className='flex space-x-4'>
-							<label className='inline-flex items-center'>
-								<input
-									type='radio'
-									value='user'
-									checked={role === "user"}
-									onChange={() => setRole("user")}
-									className='form-radio text-blue-500'
-								/>
-								<span className='ml-2'>User</span>
-							</label>
-							<label className='inline-flex items-center'>
-								<input
-									type='radio'
-									value='admin'
-									checked={role === "admin"}
-									onChange={() => setRole("admin")}
-									className='form-radio text-blue-500'
-								/>
-								<span className='ml-2'>Admin</span>
-							</label>
-						</div>
-					</div> */}
-
 					<div className='mb-6'>
 						<label className='block text-gray-700 text-sm font-bold mb-2'>
 							Password
@@ -131,18 +103,7 @@ const Login: React.FC = () => {
 							{isLoading ? "Logging in..." : "Log in"}
 						</button>
 					</div>
-
-					{/* Error message */}
-					{error && <p className='text-red-500 mt-2'>{error}</p>}
 				</form>
-
-				{/* <div className='mt-4 text-center'>
-					<Link
-						href='/forgot-password'
-						className='text-blue-500 hover:text-blue-700'>
-						Forgot your password?
-					</Link>
-				</div> */}
 
 				<div className='mt-4 text-center'>
 					<span>Don&apos;t have an account?</span>{" "}

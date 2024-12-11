@@ -1,21 +1,29 @@
 import { useEffect, useState } from "react";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
+const serverUrl= "http://localhost:3000/nextjs";
+const useSocket = (): Socket | null => {
+  const [socket, setSocket] = useState<Socket | null>(null);
 
-const useSocket = (serverURL: string) => {
-	const [socket, setSocket] = useState(null);
-	console.log(serverURL);
+  useEffect(() => {
+    // Ensure the socket connection is only established on the client
+    if (!serverUrl) return;
 
-	// Initialize socket connection
-	const socketInstance = io(serverURL);
+    const socketInstance = io(serverUrl,
+      
+      {
+        transports:["websocket"],
+        auth:{adminEmail :"palash@gmail.com"},
+      withCredentials: true, // Add options as necessary
+    });
 
-	// Save socket instance
+    setSocket(socketInstance);
 
-	// Cleanup on unmount
-	return () => {
-		socketInstance.disconnect();
-	};
+    return () => {
+      socketInstance.disconnect();
+    };
+  }, [serverUrl]);
 
-	return socketInstance;
+  return socket;
 };
 
 export default useSocket;

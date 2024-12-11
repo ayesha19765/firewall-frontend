@@ -28,7 +28,7 @@ export default function Home() {
 
 	useEffect(() => {
 		const adminEmail = JSON.parse(localStorage.getItem("adminEmail"));
-		// if (!adminEmail) router.push("/login");
+		if (!adminEmail) router.push("/login");
 		const fetchDetails = async () => {
 			const response = await axios.post("http://localhost:3000/details/", {
 				email: adminEmail,
@@ -128,22 +128,6 @@ export default function Home() {
 						<Map coordinates={coordinates} />
 					</CardContent>
 				</div>
-
-				{/* Compact Summary Card */}
-				{/* <div className='flex-1 '>
-					<CardContent>
-						<DashboardCards />{" "}
-						
-					</CardContent>
-				</div> */}
-
-				{/* Line Chart */}
-				{/* <div className="flex-1">
-          <CardContent>
-            <p className="p-4 font-semibold">Agent Activity</p>
-            <LineChart  />
-          </CardContent>
-        </div> */}
 			</section>
 
 			{/* Full-width Agents Table */}
@@ -163,19 +147,3 @@ export default function Home() {
 		</div>
 	);
 }
-/*
-login
-signup
-host
-rules
-
-add-rule
-log
-profile
-settings
-treeview2
-users
-*/
-/*
-
-*/
