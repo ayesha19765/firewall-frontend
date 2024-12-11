@@ -39,8 +39,6 @@ export const useUserStore = create<UserState>((set) => ({
 				password: passworde,
 			});
 
-			console.log(response);
-
 			const {
 				// name: user_name,
 				email: email,
@@ -72,7 +70,6 @@ export const useUserStore = create<UserState>((set) => ({
 				description: "User registered successfully.",
 			});
 		} catch (error: any) {
-			console.log(error);
 			const errorMessage =
 				error.response?.data?.message || "An error occurred. Please try again.";
 			toast({
@@ -109,9 +106,7 @@ export const useUserStore = create<UserState>((set) => ({
 					title: "Logged in successfully",
 					description: "User login successful.",
 				});
-				console.log(name, email, adminID, clientID);
 			} else {
-				console.log(error);
 				set({ error: response });
 				toast({
 					title: response.data.message,

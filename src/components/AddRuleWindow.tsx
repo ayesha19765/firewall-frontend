@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { elements } from "chart.js";
 
 // Dummy data
 const HOSTS = {
@@ -49,10 +50,12 @@ export function AddRuleDialog({
 	open,
 	onOpenChange,
 	onAddRules,
+	clientData,
 }: {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	onAddRules: (data: FormData) => void;
+	clientData: any;
 }) {
 	const [currentTab, setCurrentTab] = React.useState("host");
 	const [formData, setFormData] = React.useState<FormData>({
@@ -79,7 +82,6 @@ export function AddRuleDialog({
 	};
 
 	const handleAddRule = () => {
-		console.log("Rule added:", formData);
 		onAddRules(formData);
 		onOpenChange(false);
 	};
@@ -118,11 +120,11 @@ export function AddRuleDialog({
 								<SelectValue placeholder='Select host' />
 							</SelectTrigger>
 							<SelectContent>
-								{Object.entries(HOSTS).map(([id, host]) => (
+								{clientData?.map((elements, index) => (
 									<SelectItem
-										key={id}
-										value={id}>
-										{host}
+										key={index}
+										value={elements.clientID}>
+										{elements}
 									</SelectItem>
 								))}
 							</SelectContent>

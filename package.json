@@ -57,6 +57,7 @@
 		"react-router-dom": "^6.26.2",
 		"reagraph": "^4.19.3",
 		"recharts": "^2.14.1",
+		"socket.io-client": "^4.8.1",
 		"tailwind-merge": "^2.2.0",
 		"tailwindcss-animate": "^1.0.7",
 		"victory": "^37.1.1",

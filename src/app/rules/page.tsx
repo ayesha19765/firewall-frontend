@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Import } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BlocksTable } from "@/components/RulesTable";
@@ -11,6 +11,8 @@ import { useToast } from "@/components/hooks/use-toast";
 import { mockRules } from "@/data/rulesData";
 import type { BlockRule, FilterOptions, SortOption } from "@/types/rules";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useUserStore } from "@/lib/store/userStore";
 
 export default function Blocks() {
 	const toast = useToast();
@@ -27,6 +29,8 @@ export default function Blocks() {
 		},
 	});
 	const [sortBy, setSortBy] = useState<SortOption>("timeApplied");
+	const [clientData, setClientData] = useState();
+	let admin = useUserStore((state) => state.user);
 
 	const callAPI = (rules: any) => {
 		try {
@@ -39,6 +43,21 @@ export default function Blocks() {
 		}
 	};
 
+	useEffect(() => {
+		const func = async () => {
+			const response = await axios.post(
+				"http://localhost:3000/details/clients",
+				{
+					clientIDS: admin?.clientID,
+					email: admin?.adminID,
+				}
+			);
+
+			setClientData(response.data.data);
+		};
+		func();
+	}, []);
+
 	return (
 		<div className='container mx-auto py-6 w-full'>
 			<div className='flex items-center justify-between mb-6'>
@@ -46,6 +65,7 @@ export default function Blocks() {
 				<div className='flex gap-2'>
 					<AddRuleDialog
 						open={isAddDialogOpen}
+						clientData={clientData}
 						onOpenChange={setIsAddDialogOpen}
 						onAddRules={(rule: any) => {
 							setRules([...rules, rule]);
@@ -60,7 +80,7 @@ export default function Blocks() {
 							// 	alert("Please select Host");
 							// 	return;
 							// }
-							console.log(rule);
+
 							setIsAddDialogOpen(false);
 							callAPI(rule);
 						}}

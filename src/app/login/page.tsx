@@ -25,7 +25,10 @@ const Login: React.FC = () => {
 		await loginUser(email, password, toast);
 
 		//Redirect to dashboard or homepage on successful login
-		if (!admin?.adminID) {
+		// if (!admin?.adminID) {
+		// 	router.push("/"); // Change the path as needed
+		// }
+		if (!error) {
 			router.push("/"); // Change the path as needed
 		}
 	};

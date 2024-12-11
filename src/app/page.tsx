@@ -12,6 +12,7 @@ import DashboardCards from "@/components/DashboardCards"; // Import DashboardCar
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import Map from "@/components/Map";
 import { useUserStore } from "@/lib/store/userStore";
+import { useClientDataStore } from "@/lib/store/staticDataStore";
 import axios from "axios";
 import AlertsChart from "@/components/AlertsChart";
 import { useRouter } from "next/navigation";
@@ -30,41 +31,35 @@ export default function Home() {
 	const admino = useUserStore((state) => state.user);
 	const emailo = JSON.parse(localStorage.getItem("admin"));
 	let admin = useUserStore((state) => state.user);
+	const clientDataFetched = useClientDataStore((state) => state.clientData);
+	const fetchClientData = useClientDataStore((state) => state.fetchClientData);
 	if (admin == null) admin = JSON.parse(localStorage.getItem("admin"));
 
 	if (!admin) router.push("/login");
 
 	useEffect(() => {
-		const func = async () => {
-			const clientDataArray = [];
-			// for (let i = 0; i < admin?.clientID.length; i++) {
-			// const element = admin?.clientID[i];
-			// const a = await axios.post("http://localhost:3000/details/client", {
-			// 	clientID: element,
-			// });
-			// if (a.data.error) {
-			// const array = [];
-			// array.push(element);
-			const a = await axios.post("http://localhost:3000/details/clients", {
-				clientIDS: admin?.clientID,
-			});
-			const date = new Date().toISOString();
-			const newData = { ...a.data.data[0], last_ping: date };
-			clientDataArray.push(newData);
-			// } else {
-			// 	const date = new Date().toISOString();
-			// 	const newData = { ...a.data.data[0], last_ping: date };
-			// 	clientDataArray.push(newData);
-			// }
-			// }
-			setClientData(clientDataArray);
-		};
-		func();
+		// const func = async () => {
+		// 	const clientDataArray = [];
+		// 	const a = await axios.post("http://localhost:3000/details/clients", {
+		// 		clientIDS: admin?.clientID,
+		// 		email: admin?.email,
+		// 	});
+		// 	const date = new Date().toISOString();
+		// 	const newData = { ...a.data.data[0], last_ping: date };
+		// 	clientDataArray.push(newData);
+		// 	setClientData(clientDataArray);
+		// };
+		// func();
+		async function fetch() {
+			await fetchClientData();
+		}
+		fetch();
+		setClientData(clientDataFetched);
+		console.log(clientDataFetched);
 	}, []);
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				console.log(emailo);
 				const adminResponse = await axios.post(
 					"http://localhost:3000/details/admin",
 					{
@@ -78,7 +73,6 @@ export default function Home() {
 				console.error("Error fetching data:", error);
 			}
 		};
-		console.log("****************88");
 
 		fetchData();
 	}, []);
@@ -111,7 +105,7 @@ export default function Home() {
 
 			const filteredCoordinates = coordinatesArray.filter(Boolean); // Remove nulls
 			setCoordinates(filteredCoordinates);
-			console.log("Updated Coordinates:", filteredCoordinates);
+			// console.log("Updated Coordinates:", filteredCoordinates);
 		};
 
 		fetchCoordinates();

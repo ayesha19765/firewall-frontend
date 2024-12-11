@@ -14,7 +14,6 @@ import Overlay from "ol/Overlay";
 import Cluster from "ol/source/Cluster"; // Import the Cluster source
 
 const MapComponent = ({ coordinates }) => {
-	console.log("cc", coordinates);
 	const mapRef = useRef();
 	const [hoveredFeature, setHoveredFeature] = useState(null);
 
@@ -123,7 +122,12 @@ const MapComponent = ({ coordinates }) => {
 		return () => map.setTarget(null);
 	}, [coordinates]);
 
-	return <div ref={mapRef} style={{ height: "50vh", width: "100%" }} />;
+	return (
+		<div
+			ref={mapRef}
+			style={{ height: "50vh", width: "100%" }}
+		/>
+	);
 };
 
 export default MapComponent;
