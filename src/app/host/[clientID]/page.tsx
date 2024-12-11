@@ -11,7 +11,7 @@ import { PolicyColumns, policies } from "@/data/policyData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { GetServerSideProps } from "next";
-import { useClientDataStore } from "@/lib/store/staticDataStore";
+import { useClientDataStore } from "@/lib/store/clientDataStore";
 import axios from "axios";
 import ActiveConnections from "@/components/ActiveConnections";
 import RunningProcesses from "@/components/RunningProcesses";

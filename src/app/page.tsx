@@ -12,7 +12,8 @@ import DashboardCards from "@/components/DashboardCards"; // Import DashboardCar
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import Map from "@/components/Map";
 import { useUserStore } from "@/lib/store/userStore";
-import { useClientDataStore } from "@/lib/store/staticDataStore";
+import { useClientDataStore } from "@/lib/store/clientDataStore";
+import { useAdminStore } from "@/lib/store/adminData";
 import axios from "axios";
 import AlertsChart from "@/components/AlertsChart";
 import { useRouter } from "next/navigation";
@@ -26,55 +27,35 @@ export default function Home() {
 	const [activeClients, setActiveClients] = useState<string[]>([]);
 	const [inactiveClients, setInactiveClients] = useState<string[]>([]);
 	const router = useRouter();
+	const [adminData, setAdminData] = useState();
 	const [clientData, setClientData] = useState();
 	const [coordinates, setCoordinates] = useState([]);
 	const admino = useUserStore((state) => state.user);
-	const emailo = JSON.parse(localStorage.getItem("admin"));
+	// const emailo = JSON.parse(localStorage.getItem("admin"));
 	let admin = useUserStore((state) => state.user);
+	const adminDataFetched = useAdminStore((state) => state.adminData);
+	const fetchAdminData = useAdminStore((state) => state.fetchAdminData);
 	const clientDataFetched = useClientDataStore((state) => state.clientData);
 	const fetchClientData = useClientDataStore((state) => state.fetchClientData);
-	if (admin == null) admin = JSON.parse(localStorage.getItem("admin"));
 
 	if (!admin) router.push("/login");
 
 	useEffect(() => {
-		// const func = async () => {
-		// 	const clientDataArray = [];
-		// 	const a = await axios.post("http://localhost:3000/details/clients", {
-		// 		clientIDS: admin?.clientID,
-		// 		email: admin?.email,
-		// 	});
-		// 	const date = new Date().toISOString();
-		// 	const newData = { ...a.data.data[0], last_ping: date };
-		// 	clientDataArray.push(newData);
-		// 	setClientData(clientDataArray);
-		// };
-		// func();
-		async function fetch() {
-			await fetchClientData();
-		}
-		fetch();
-		setClientData(clientDataFetched);
-		console.log(clientDataFetched);
-	}, []);
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const adminResponse = await axios.post(
-					"http://localhost:3000/details/admin",
-					{
-						email: emailo.email,
-					}
-				);
-				const { activeClients, admin } = adminResponse.data;
-				setActiveClients(activeClients);
-				setInactiveClients(admin?.clientID);
-			} catch (error) {
-				console.error("Error fetching data:", error);
-			}
-		};
+		admin = JSON.parse(localStorage.getItem("admin"));
+		const emailTopass = admin?.email;
 
-		fetchData();
+		async function fetchAdmin() {
+			await fetchAdminData(emailTopass || "palash@gmail.com");
+		}
+		fetchAdmin();
+	}, []);
+
+	useEffect(() => {
+		console.log(adminDataFetched);
+		async function fetchClient() {
+			await fetchClientData({ clientIDS: adminDataFetched?.admin.clientID });
+		}
+		fetchClient();
 	}, []);
 
 	useEffect(() => {
@@ -82,7 +63,6 @@ export default function Home() {
 			if (!clientData?.length) return;
 			const coordinatesArray = await Promise.all(
 				clientData.map(async (client) => {
-					// console.log(, "ss");
 					try {
 						const response = await axios.get(
 							`http://ip-api.com/json/${client.device_info.public_ip}`
@@ -105,7 +85,6 @@ export default function Home() {
 
 			const filteredCoordinates = coordinatesArray.filter(Boolean); // Remove nulls
 			setCoordinates(filteredCoordinates);
-			// console.log("Updated Coordinates:", filteredCoordinates);
 		};
 
 		fetchCoordinates();
@@ -176,7 +155,7 @@ export default function Home() {
 			<section className='w-[85vw] md:w-full'>
 				<CardContent>
 					<p className='p-4 font-semibold'>Overview</p>
-					<AgentsTable clientData={clientData} />
+					<AgentsTable />
 				</CardContent>
 			</section>
 			<section className='w-[85vw] md:w-full'>

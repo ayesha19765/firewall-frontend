@@ -1,12 +1,12 @@
 import { create } from "zustand";
 import axios from "axios";
-import { useUserStore } from "./userStore";
+import { useAdminStore } from "./adminData";
 
 interface ClientDataState {
 	clientData: any;
 	isLoading: boolean;
 	error: string | null;
-	fetchClientData: () => Promise<void>;
+	fetchClientData: ({ clientIDS }: any) => Promise<void>;
 }
 
 export const useClientDataStore = create<ClientDataState>((set) => ({
@@ -14,16 +14,17 @@ export const useClientDataStore = create<ClientDataState>((set) => ({
 	isLoading: false,
 	error: null,
 
-	fetchClientData: async () => {
+	fetchClientData: async ({ clientIDS }: any) => {
 		set({ isLoading: true, error: null });
-		let admin = useUserStore((state) => state.user);
-		// console.log(admin);
 
 		try {
 			const response = await axios.post(
 				`http://localhost:3000/details/clients`,
-				{ email: admin?.email, clientIDS: admin?.clientID }
+				{
+					clientIDS: clientIDS,
+				}
 			);
+			console.log(response);
 
 			set({ clientData: response.data.data, isLoading: false });
 		} catch (error: any) {

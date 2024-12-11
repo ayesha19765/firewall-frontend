@@ -5,10 +5,18 @@ import { useRouter } from "next/navigation";
 import { EyeIcon, CogIcon } from "@heroicons/react/24/solid";
 import { nodes } from "../data/nodesData"; // Import the nodes data
 import { useUserStore } from "@/lib/store/userStore";
+import { useClientDataStore } from "@/lib/store/clientDataStore";
+import { useAdminStore } from "@/lib/store/adminData";
 
-export default function NodesTable({ clientData }: any) {
+export default function NodesTable() {
+	const adminDataFetched = useAdminStore((state) => state.adminData);
+	const fetchAdminData = useAdminStore((state) => state.fetchAdminData);
+	const clientDataFetched = useClientDataStore((state) => state.clientData);
+	const fetchClientData = useClientDataStore((state) => state.fetchClientData);
 	const admin = useUserStore((state) => state.user);
 	const router = useRouter(); // Initialize the router
+
+	const clientData = clientDataFetched;
 
 	const navigateToPolicy = () => {
 		router.push(`/policy`); // Navigate to the Policy page
