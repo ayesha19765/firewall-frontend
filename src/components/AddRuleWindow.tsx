@@ -23,12 +23,14 @@ import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
+import axios from "axios";
+import { Checkbox } from "./ui/checkbox";
 
 interface Rule {
 	rule_name: string;
 	description: string;
 	direction: "inbound" | "outbound";
-	action: "allow" | "deny";
+	action: "allow" | "block";
 	application: { name: string; path: string }[];
 	domain: string[];
 	hosts: string[];
@@ -83,10 +85,16 @@ export function AddRuleDialog({ open, onOpenChange }: AddRuleDialogProps) {
 	}
 
 	const [searchTerm, setSearchTerm] = React.useState("");
-	const onAddRule = (rule) => {
+	const onAddRule = async (rule) => {
 		console.log(rule);
+
 		const newData = convertToNewFormat(rule);
 		console.log(newData);
+		const response = await axios.post(
+			"http://localhost:3000/rules/add-app-rules",
+			newData
+		);
+		console.log(response);
 	};
 
 	const handleInputChange = (field: keyof Rule, value: any) => {
@@ -156,17 +164,21 @@ export function AddRuleDialog({ open, onOpenChange }: AddRuleDialogProps) {
 							value={searchTerm}
 							onChange={(e) => setSearchTerm(e.target.value)}
 						/>
-						<RadioGroup
-							value={rule.hosts.join(",")}
-							onValueChange={(value) =>
-								handleInputChange("hosts", value.split(","))
-							}>
+						<div>
 							{filteredHosts.map((client) => (
 								<div
 									key={client.clientID}
-									className='flex items-center space-x-2'>
-									<RadioGroupItem
-										value={client.clientID}
+									className='flex items-center space-x-2 space-y-2'>
+									<Checkbox
+										checked={rule.hosts.includes(client.clientID)}
+										onCheckedChange={(checked) => {
+											setRule((prev) => ({
+												...prev,
+												hosts: checked
+													? [...prev.hosts, client.clientID] // Add to array if checked
+													: prev.hosts.filter((id) => id !== client.clientID), // Remove if unchecked
+											}));
+										}}
 										id={client.clientID}
 									/>
 									<Label htmlFor={client.clientID}>
@@ -174,7 +186,7 @@ export function AddRuleDialog({ open, onOpenChange }: AddRuleDialogProps) {
 									</Label>
 								</div>
 							))}
-						</RadioGroup>
+						</div>
 					</TabsContent>
 
 					<TabsContent
@@ -343,14 +355,14 @@ export function AddRuleDialog({ open, onOpenChange }: AddRuleDialogProps) {
 						<Select
 							value={rule.action}
 							onValueChange={(value) =>
-								handleInputChange("action", value as "allow" | "deny")
+								handleInputChange("action", value as "allow" | "block")
 							}>
 							<SelectTrigger>
 								<SelectValue placeholder='Select action' />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value='allow'>Allow</SelectItem>
-								<SelectItem value='deny'>Deny</SelectItem>
+								<SelectItem value='block'>Deny</SelectItem>
 							</SelectContent>
 						</Select>
 					</TabsContent>

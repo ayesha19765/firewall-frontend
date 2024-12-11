@@ -13,9 +13,31 @@ import type { BlockRule, FilterOptions, SortOption } from "@/types/rules";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/lib/store/userStore";
+import useSocket from "@/lib/hooks/useSocket.tsx";
 
 export default function Blocks() {
 	const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+	const serverURL = "http://localhost:3000"; // Replace with your actual server URL
+	// const socket = useSocket(serverURL);
+
+	// useEffect(() => {
+	// 	if (socket) {
+	// 		// Listen for events
+	// 		socket.on("message", (data) => {
+	// 			console.log("Received message:", data);
+	// 		});
+
+	// 		// Emit an event
+	// 		socket.emit("joinRoom", { room: "room1" });
+	// 	}
+
+	// 	// Cleanup the listeners
+	// 	return () => {
+	// 		if (socket) {
+	// 			socket.off("message");
+	// 		}
+	// 	};
+	// }, [socket]);
 
 	return (
 		<div className='container mx-auto py-6 w-full'>

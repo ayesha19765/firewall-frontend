@@ -23,13 +23,8 @@ const cardData: CardProps[] = [
 ];
 
 export default function Home() {
-	// const [activeClients, setActiveClients] = useState();
-	// const [inactiveClients, setInactiveClients] = useState();
 	const router = useRouter();
 	const [coordinates, setCoordinates] = useState([]);
-
-	// const [clientData, setClientData] = useState();
-	// const [adminData, setAdminData] = useState();
 
 	useEffect(() => {
 		const adminEmail = JSON.parse(localStorage.getItem("adminEmail"));
