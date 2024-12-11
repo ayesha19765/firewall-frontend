@@ -56,7 +56,7 @@ export default function NodesTable() {
 							className='cursor-pointer'>
 							<td className='px-4 py-2 border'>{node?.clientID || ""}</td>
 							<td className='px-4 py-2 border'>
-								{node.device_info.deviceName}
+								{node.device_info.device_name}
 							</td>
 							<td className='px-4 py-2 border'>
 								{node?.device_info?.public_ip}

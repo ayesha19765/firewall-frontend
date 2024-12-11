@@ -43,14 +43,46 @@ export default function Home() {
 				"clientDetails",
 				JSON.stringify(response.data.clientDetails)
 			);
+			localStorage.setItem("activeConnectionsNo", JSON.stringify(5));
+			localStorage.setItem("inactiveConnectionsNo", JSON.stringify(3));
 		};
 		fetchDetails();
 	}, []);
-
 	const adminData = JSON.parse(localStorage.getItem("adminDetails"));
 	const clientData = JSON.parse(localStorage.getItem("clientDetails"));
 	const activeClients = JSON.parse(localStorage.getItem("activeClients"));
 	const inactiveClients = [];
+	useEffect(() => {
+		const fetchCoordinates = async () => {
+			if (!clientData?.length) return;
+			const coordinatesArray = await Promise.all(
+				clientData.map(async (client) => {
+					try {
+						const response = await axios.get(
+							`http://ip-api.com/json/${client.device_info.public_ip}`
+						);
+						const { lat, lon } = response.data;
+						return {
+							lat,
+							lng: lon,
+							label: client.device_info.device_name || "Unknown",
+						};
+					} catch (error) {
+						console.error(
+							`Error fetching coordinates for IP ${client.public_ip}:`,
+							error
+						);
+						return null;
+					}
+				})
+			);
+
+			const filteredCoordinates = coordinatesArray.filter(Boolean); // Remove nulls
+			setCoordinates(filteredCoordinates);
+		};
+
+		fetchCoordinates();
+	}, [clientData]);
 
 	return (
 		<div className='flex flex-col gap-4 w-full text-sm'>
@@ -143,4 +175,7 @@ profile
 settings
 treeview2
 users
+*/
+/*
+
 */
