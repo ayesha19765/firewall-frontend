@@ -21,77 +21,45 @@ import { useRouter } from "next/navigation";
 const cardData: CardProps[] = [
 	// Your card data here...
 ];
-const email = "admin@mail.com";
 
 export default function Home() {
-	const [activeClients, setActiveClients] = useState<string[]>([]);
-	const [inactiveClients, setInactiveClients] = useState<string[]>([]);
+	// const [activeClients, setActiveClients] = useState();
+	// const [inactiveClients, setInactiveClients] = useState();
 	const router = useRouter();
-	const [adminData, setAdminData] = useState();
-	const [clientData, setClientData] = useState();
 	const [coordinates, setCoordinates] = useState([]);
-	const admino = useUserStore((state) => state.user);
-	// const emailo = JSON.parse(localStorage.getItem("admin"));
-	let admin = useUserStore((state) => state.user);
-	const adminDataFetched = useAdminStore((state) => state.adminData);
-	const fetchAdminData = useAdminStore((state) => state.fetchAdminData);
-	const clientDataFetched = useClientDataStore((state) => state.clientData);
-	const fetchClientData = useClientDataStore((state) => state.fetchClientData);
 
-	if (!admin) router.push("/login");
+	// const [clientData, setClientData] = useState();
+	// const [adminData, setAdminData] = useState();
 
 	useEffect(() => {
-		admin = JSON.parse(localStorage.getItem("admin"));
-		const emailTopass = admin?.email;
-
-		async function fetchAdmin() {
-			await fetchAdminData(emailTopass || "palash@gmail.com");
-		}
-		fetchAdmin();
-	}, []);
-
-	useEffect(() => {
-		console.log(adminDataFetched);
-		async function fetchClient() {
-			await fetchClientData({ clientIDS: adminDataFetched?.admin.clientID });
-		}
-		fetchClient();
-	}, []);
-
-	useEffect(() => {
-		const fetchCoordinates = async () => {
-			if (!clientData?.length) return;
-			const coordinatesArray = await Promise.all(
-				clientData.map(async (client) => {
-					try {
-						const response = await axios.get(
-							`http://ip-api.com/json/${client.device_info.public_ip}`
-						);
-						const { lat, lon } = response.data;
-						return {
-							lat,
-							lng: lon,
-							label: client.device_info.device_name || "Unknown",
-						};
-					} catch (error) {
-						console.error(
-							`Error fetching coordinates for IP ${client.public_ip}:`,
-							error
-						);
-						return null;
-					}
-				})
+		const adminEmail = JSON.parse(localStorage.getItem("adminEmail"));
+		// if (!adminEmail) router.push("/login");
+		const fetchDetails = async () => {
+			const response = await axios.post("http://localhost:3000/details/", {
+				email: adminEmail,
+			});
+			console.log(response);
+			localStorage.setItem("adminDetails", JSON.stringify(response.data.admin));
+			localStorage.setItem(
+				"activeClients",
+				JSON.stringify(response.data.activeClients)
 			);
-
-			const filteredCoordinates = coordinatesArray.filter(Boolean); // Remove nulls
-			setCoordinates(filteredCoordinates);
+			localStorage.setItem(
+				"clientDetails",
+				JSON.stringify(response.data.clientDetails)
+			);
 		};
+		fetchDetails();
+	}, []);
 
-		fetchCoordinates();
-	}, [clientData]); // Runs when clientData updates
+	const adminData = JSON.parse(localStorage.getItem("adminDetails"));
+	const clientData = JSON.parse(localStorage.getItem("clientDetails"));
+	const activeClients = JSON.parse(localStorage.getItem("activeClients"));
+	const inactiveClients = [];
+
 	return (
 		<div className='flex flex-col gap-4 w-full text-sm'>
-			<div>Dashboard - {admin?.email}</div>
+			<div>Dashboard - {adminData?.email}</div>
 
 			{/* Cards Section */}
 			<section className='grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4'>

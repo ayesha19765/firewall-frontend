@@ -6,12 +6,13 @@ import Image from "next/image"; // Import Image component for optimized image lo
 import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { toast } from "@/components/hooks/use-toast";
 import { useUserStore } from "@/lib/store/userStore";
+import axios from "axios";
 
 const Login: React.FC = () => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
-	const [role, setRole] = useState("user"); // New state for role selection
+	// const [role, setRole] = useState("user"); // New state for role selection
 	const loginUser = useUserStore((state) => state.loginUser);
 	const error = useUserStore((state) => state.error);
 	const isLoading = useUserStore((state) => state.isLoading);
@@ -21,15 +22,21 @@ const Login: React.FC = () => {
 
 	const handleLogin = async (e: React.FormEvent) => {
 		e.preventDefault();
-		// Handle login logic
-		await loginUser(email, password, toast);
 
-		//Redirect to dashboard or homepage on successful login
-		// if (!admin?.adminID) {
-		// 	router.push("/"); // Change the path as needed
-		// }
-		if (!error) {
-			router.push("/"); // Change the path as needed
+		const response = await axios.post("http://localhost:3000/admin/signin", {
+			email: email,
+			password: password,
+		});
+
+		console.log(response);
+
+		localStorage.setItem(
+			"adminEmail",
+			JSON.stringify(response.data.admin.email)
+		);
+
+		if (response.status == 200) {
+			router.push("/");
 		}
 	};
 

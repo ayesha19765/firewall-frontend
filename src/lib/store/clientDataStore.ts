@@ -24,7 +24,6 @@ export const useClientDataStore = create<ClientDataState>((set) => ({
 					clientIDS: clientIDS,
 				}
 			);
-			console.log(response);
 
 			set({ clientData: response.data.data, isLoading: false });
 		} catch (error: any) {

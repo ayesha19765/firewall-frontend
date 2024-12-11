@@ -15,48 +15,7 @@ import { useRouter } from "next/navigation";
 import { useUserStore } from "@/lib/store/userStore";
 
 export default function Blocks() {
-	const toast = useToast();
-	const [rules, setRules] = useState<BlockRule[]>(mockRules);
 	const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-	const [filters, setFilters] = useState<FilterOptions>({
-		appCategory: [],
-		hosts: [],
-		domains: [],
-		internetAccess: false,
-		timeRange: {
-			start: null,
-			end: null,
-		},
-	});
-	const [sortBy, setSortBy] = useState<SortOption>("timeApplied");
-	const [clientData, setClientData] = useState();
-	let admin = useUserStore((state) => state.user);
-
-	const callAPI = (rules: any) => {
-		try {
-			const response = axios.post("http://localhost:3000/rules/add-app-rules", {
-				rules: rules,
-				clientID: rules.clientID,
-			});
-		} catch (error) {
-			console.log(error);
-		}
-	};
-
-	useEffect(() => {
-		const func = async () => {
-			const response = await axios.post(
-				"http://localhost:3000/details/clients",
-				{
-					clientIDS: admin?.clientID,
-					email: admin?.adminID,
-				}
-			);
-
-			setClientData(response.data.data);
-		};
-		func();
-	}, []);
 
 	return (
 		<div className='container mx-auto py-6 w-full'>
@@ -65,25 +24,7 @@ export default function Blocks() {
 				<div className='flex gap-2'>
 					<AddRuleDialog
 						open={isAddDialogOpen}
-						clientData={clientData}
 						onOpenChange={setIsAddDialogOpen}
-						onAddRules={(rule: any) => {
-							setRules([...rules, rule]);
-							// if (rules.clientID == null) {
-							// 	alert("Please select Host");
-							// 	return;
-							// } else if (
-							// 	rules.rules[0].appName == null &&
-							// 	rules.rules[0].domain == null &&
-							// 	rules.rules[0].ports == null
-							// ) {
-							// 	alert("Please select Host");
-							// 	return;
-							// }
-
-							setIsAddDialogOpen(false);
-							callAPI(rule);
-						}}
 					/>
 
 					<Button variant='outline'>
@@ -102,7 +43,7 @@ export default function Blocks() {
 				</div> */}
 
 				<div className='col-span-7 w-[72vw]'>
-					<BlocksTable
+					{/* <BlocksTable
 						rules={rules}
 						onStatusChange={(id, status) => {
 							setRules(
@@ -111,15 +52,8 @@ export default function Blocks() {
 								)
 							);
 						}}
-					/>
+					/> */}
 				</div>
-
-				{/* <div className='col-span-2 w-[20%]'>
-					<BlocksSort
-						value={sortBy}
-						onValueChange={setSortBy}
-					/>
-				</div> */}
 			</div>
 		</div>
 	);

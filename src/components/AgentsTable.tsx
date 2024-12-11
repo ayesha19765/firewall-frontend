@@ -9,14 +9,16 @@ import { useClientDataStore } from "@/lib/store/clientDataStore";
 import { useAdminStore } from "@/lib/store/adminData";
 
 export default function NodesTable() {
-	const adminDataFetched = useAdminStore((state) => state.adminData);
-	const fetchAdminData = useAdminStore((state) => state.fetchAdminData);
-	const clientDataFetched = useClientDataStore((state) => state.clientData);
-	const fetchClientData = useClientDataStore((state) => state.fetchClientData);
-	const admin = useUserStore((state) => state.user);
+	// const adminDataFetched = useAdminStore((state) => state.adminData);
+	// const fetchAdminData = useAdminStore((state) => state.fetchAdminData);
+	// const clientDataFetched = useClientDataStore((state) => state.clientData);
+	// const fetchClientData = useClientDataStore((state) => state.fetchClientData);
+	// const admin = useUserStore((state) => state.user);
 	const router = useRouter(); // Initialize the router
 
-	const clientData = clientDataFetched;
+	// const clientData = clientDataFetched;
+
+	// console.log(clientData);
 
 	const navigateToPolicy = () => {
 		router.push(`/policy`); // Navigate to the Policy page
@@ -29,6 +31,11 @@ export default function NodesTable() {
 	const navigateToHost = (node_id: any) => {
 		router.push(`host/${node_id}`);
 	};
+
+	const adminData = JSON.parse(localStorage.getItem("adminDetails"));
+	const clientData = JSON.parse(localStorage.getItem("clientDetails"));
+	const activeClients = JSON.parse(localStorage.getItem("activeClients"));
+	const inactiveClients = [];
 
 	return (
 		<div className='overflow-x-auto'>
@@ -55,33 +62,6 @@ export default function NodesTable() {
 								{node?.device_info?.public_ip}
 							</td>
 							<td className='px-4 py-2 border'>{node?.device_info?.os}</td>
-
-							{/* <td className='px-4 py-2 border'>
-								<span
-									className={`${
-										node.status === "active"
-											? "text-green-600"
-											: node.status === "inactive"
-											? "text-red-600"
-											: "text-yellow-600"
-									}`}>
-									{node.status}
-								</span>
-							</td>
-							<td className='px-4 py-2 border'>{node.lastPing}</td>
-							<td className='px-4 py-2 border'>{node.anomaliesDetected}</td> */}
-							{/* <td className='px-4 py-2 border'>
-								<button
-									onClick={navigateToPolicy}
-									title='View Policies'>
-									<EyeIcon className='h-5 w-5 text-blue-500' />
-								</button>
-								<button
-									onClick={navigateToLog}
-									title='Add Policy'>
-									<CogIcon className='h-5 w-5 text-gray-500' />
-								</button>
-							</td> */}
 						</tr>
 					))}
 				</tbody>

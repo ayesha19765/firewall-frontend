@@ -8,50 +8,19 @@ import axios from "axios";
 import { useUserStore } from "@/lib/store/userStore";
 
 export default function HostsOverall() {
-	const [activeClients, setActiveClients] = useState<string[]>([]);
-	const [inactiveClients, setInactiveClients] = useState<string[]>([]);
-	const [overallData, setOverallData] = useState([]);
-	const [adminEmail, setAdminEmail] = useState<string>("");
 	const router = useRouter();
-	const admino = useUserStore((state) => state.user);
-	const emailo = JSON.parse(localStorage.getItem("admin"));
-
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				console.log(emailo);
-				const adminResponse = await axios.post(
-					"http://localhost:3000/details/admin",
-					{
-						email: emailo.email,
-					}
-				);
-				const { activeClients, admin } = adminResponse.data;
-				setActiveClients(activeClients);
-				setInactiveClients(admin?.clientID);
-
-				const allClientIds = [...activeClients, ...admin.clientID];
-				const clientsResponse = await axios.post(
-					"http://localhost:3000/details/clients",
-					{
-						clientIDS: allClientIds,
-					}
-				);
-				console.log("Overadcdcll", clientsResponse);
-
-				setOverallData(clientsResponse.data.data);
-			} catch (error) {
-				console.error("Error fetching data:", error);
-			}
-		};
-		console.log("****************88");
-
-		fetchData();
-	}, []);
 
 	const navigateToHost = (clientId: string) => {
 		router.push(`/host/${clientId}`);
 	};
+
+	const adminData = JSON.parse(localStorage.getItem("adminDetails"));
+	const overallData = JSON.parse(localStorage.getItem("clientDetails"));
+	const activeClients = JSON.parse(localStorage.getItem("activeClients"));
+
+	const inactiveClients = adminData.clientID.filter((clientID) => {
+		return !activeClients.includes(clientID);
+	});
 
 	const HostCard = ({ clientData }: any) => (
 		<Card
@@ -89,7 +58,7 @@ export default function HostsOverall() {
 	return (
 		<div className='p-6'>
 			<h1 className='text-2xl font-bold mb-4'>Hosts Overview</h1>
-			<p className='mb-6'>Admin: {adminEmail}</p>
+			<p className='mb-6'>Admin: {adminData.email}</p>
 
 			<div className='flex flex-col md:flex-row gap-6'>
 				<div className='flex-1'>

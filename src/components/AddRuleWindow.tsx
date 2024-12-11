@@ -19,58 +19,78 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { elements } from "chart.js";
-
-// Dummy data
-const HOSTS = {
-	client123: "host1.example.com",
-	client456: "host2.example.com",
-	client789: "host3.example.com",
-};
-
-const APPLICATIONS = ["Chrome", "Firefox", "Safari", "VS Code", "Slack"];
+import { Badge } from "@/components/ui/badge";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { X } from "lucide-react";
 
 interface Rule {
-	rule_name?: string;
-	rule_description?: string;
-	appName?: string;
-	domain?: string;
-	app_path?: string;
-	direction?: "inbound" | "outbound";
-	ports?: number[];
-	action?: "allow" | "deny";
+	rule_name: string;
+	description: string;
+	direction: "inbound" | "outbound";
+	action: "allow" | "deny";
+	application: { name: string; path: string }[];
+	domain: string[];
+	hosts: string[];
+	ports: number[];
 }
 
-interface FormData {
-	clientID?: string;
-	rules: Rule[];
-}
-
-export function AddRuleDialog({
-	open,
-	onOpenChange,
-	onAddRules,
-	clientData,
-}: {
+interface AddRuleDialogProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	onAddRules: (data: FormData) => void;
-	clientData: any;
-}) {
+}
+
+export function AddRuleDialog({ open, onOpenChange }: AddRuleDialogProps) {
 	const [currentTab, setCurrentTab] = React.useState("host");
-	const [formData, setFormData] = React.useState<FormData>({
-		clientID: undefined,
-		rules: [{}],
+	const [rule, setRule] = React.useState<Rule>({
+		rule_name: "",
+		description: "",
+		direction: "inbound",
+		action: "allow",
+		application: [],
+		domain: [],
+		hosts: [],
+		ports: [],
 	});
 
-	const handleInputChange = (
-		field: keyof Rule,
-		value: string | number[] | undefined
-	) => {
-		setFormData((prev) => ({
-			...prev,
-			rules: [{ ...prev.rules[0], [field]: value }],
-		}));
+	const adminData = JSON.parse(localStorage.getItem("adminDetails"));
+	const clientData = JSON.parse(localStorage.getItem("clientDetails"));
+	const activeClients = JSON.parse(localStorage.getItem("activeClients"));
+
+	function convertToNewFormat(originalData) {
+		const newData = {
+			data: [],
+		};
+
+		originalData.hosts.forEach((clientID) => {
+			const rules = originalData.application.map((app) => ({
+				rule_name: originalData.rule_name,
+				appName: app.name,
+				domains: originalData.domain,
+				app_path: app.path,
+				direction: originalData.direction,
+				action: originalData.action,
+				ip_addresses: originalData.ports, // Assuming ports are IP addresses in the new format
+			}));
+
+			newData.data.push({
+				clientID: clientID,
+				rules: rules,
+			});
+		});
+
+		return newData;
+	}
+
+	const [searchTerm, setSearchTerm] = React.useState("");
+	const onAddRule = (rule) => {
+		console.log(rule);
+		const newData = convertToNewFormat(rule);
+		console.log(newData);
+	};
+
+	const handleInputChange = (field: keyof Rule, value: any) => {
+		setRule((prev) => ({ ...prev, [field]: value }));
 	};
 
 	const handleNext = () => {
@@ -82,9 +102,28 @@ export function AddRuleDialog({
 	};
 
 	const handleAddRule = () => {
-		onAddRules(formData);
+		onAddRule(rule);
 		onOpenChange(false);
 	};
+
+	const filteredHosts = clientData.filter((client) =>
+		client.device_info.device_name
+			.toLowerCase()
+			.includes(searchTerm.toLowerCase())
+	);
+
+	const commonApps = React.useMemo(() => {
+		if (rule.hosts.length === 0) return [];
+		const selectedClients = clientData.filter((client) =>
+			rule.hosts.includes(client.clientID)
+		);
+		return selectedClients.reduce((common, client) => {
+			if (common.length === 0) return client.application_data;
+			return common.filter((app) =>
+				client.application_data.some((clientApp) => clientApp.name === app.name)
+			);
+		}, []);
+	}, [rule.hosts, clientData]);
 
 	return (
 		<Dialog
@@ -112,58 +151,128 @@ export function AddRuleDialog({
 					<TabsContent
 						value='host'
 						className='space-y-4'>
-						<Select
+						<Input
+							placeholder='Search hosts'
+							value={searchTerm}
+							onChange={(e) => setSearchTerm(e.target.value)}
+						/>
+						<RadioGroup
+							value={rule.hosts.join(",")}
 							onValueChange={(value) =>
-								setFormData((prev) => ({ ...prev, clientID: value }))
+								handleInputChange("hosts", value.split(","))
 							}>
-							<SelectTrigger>
-								<SelectValue placeholder='Select host' />
-							</SelectTrigger>
-							<SelectContent>
-								{clientData?.map((elements, index) => (
-									<SelectItem
-										key={index}
-										value={elements.clientID}>
-										{elements}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+							{filteredHosts.map((client) => (
+								<div
+									key={client.clientID}
+									className='flex items-center space-x-2'>
+									<RadioGroupItem
+										value={client.clientID}
+										id={client.clientID}
+									/>
+									<Label htmlFor={client.clientID}>
+										{client.device_info.device_name}
+									</Label>
+								</div>
+							))}
+						</RadioGroup>
 					</TabsContent>
 
 					<TabsContent
 						value='application'
 						className='space-y-4'>
 						<Select
-							onValueChange={(value) => handleInputChange("appName", value)}>
+							onValueChange={(value) => {
+								const [name, path] = value.split("|");
+								setRule((prev) => ({
+									...prev,
+									application: [...prev.application, { name, path }],
+								}));
+							}}>
 							<SelectTrigger>
 								<SelectValue placeholder='Select application' />
 							</SelectTrigger>
 							<SelectContent>
-								{APPLICATIONS.map((app) => (
+								{commonApps.map((app, index) => (
 									<SelectItem
-										key={app}
-										value={app}>
-										{app}
+										key={index}
+										value={`${app.name}|${app.path}`}>
+										{app.name}
 									</SelectItem>
 								))}
 							</SelectContent>
 						</Select>
-						<Input
-							placeholder='Application path'
-							value={formData.rules[0]?.app_path ?? ""}
-							onChange={(e) => handleInputChange("app_path", e.target.value)}
-						/>
+						<div className='flex flex-wrap gap-2'>
+							{rule.application.map((app, index) => (
+								<Badge
+									key={index}
+									variant='secondary'>
+									{app.name}
+									<Button
+										variant='ghost'
+										size='sm'
+										className='ml-2 h-4 w-4 p-0'
+										onClick={() =>
+											setRule((prev) => ({
+												...prev,
+												application: prev.application.filter(
+													(_, i) => i !== index
+												),
+											}))
+										}>
+										<X className='h-3 w-3' />
+									</Button>
+								</Badge>
+							))}
+						</div>
 					</TabsContent>
 
 					<TabsContent
 						value='domain'
 						className='space-y-4'>
 						<Input
-							placeholder='Enter domain'
-							value={formData.rules[0]?.domain ?? ""}
-							onChange={(e) => handleInputChange("domain", e.target.value)}
+							placeholder='Enter domains (comma-separated)'
+							value={rule.domain.join(", ")}
+							onChange={(e) =>
+								handleInputChange(
+									"domain",
+									e.target.value.split(",").map((d) => d.trim())
+								)
+							}
 						/>
+						<Select
+							onValueChange={(value) =>
+								console.log("Selected category:", value)
+							}>
+							<SelectTrigger>
+								<SelectValue placeholder='Select domain category' />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value='business'>Business</SelectItem>
+								<SelectItem value='personal'>Personal</SelectItem>
+								<SelectItem value='social'>Social</SelectItem>
+							</SelectContent>
+						</Select>
+						<div className='flex flex-wrap gap-2'>
+							{rule.domain.map((domain, index) => (
+								<Badge
+									key={index}
+									variant='secondary'>
+									{domain}
+									<Button
+										variant='ghost'
+										size='sm'
+										className='ml-2 h-4 w-4 p-0'
+										onClick={() =>
+											setRule((prev) => ({
+												...prev,
+												domain: prev.domain.filter((_, i) => i !== index),
+											}))
+										}>
+										<X className='h-3 w-3' />
+									</Button>
+								</Badge>
+							))}
+						</div>
 					</TabsContent>
 
 					<TabsContent
@@ -171,15 +280,38 @@ export function AddRuleDialog({
 						className='space-y-4'>
 						<Input
 							placeholder='Enter ports (comma-separated)'
-							value={formData.rules[0]?.ports?.join(", ") ?? ""}
-							onChange={(e) => {
-								const ports = e.target.value
-									.split(",")
-									.map((port) => parseInt(port.trim()))
-									.filter((port) => !isNaN(port));
-								handleInputChange("ports", ports);
-							}}
+							value={rule.ports.join(", ")}
+							onChange={(e) =>
+								handleInputChange(
+									"ports",
+									e.target.value
+										.split(",")
+										.map((port) => parseInt(port.trim()))
+										.filter((port) => !isNaN(port))
+								)
+							}
 						/>
+						<div className='flex flex-wrap gap-2'>
+							{rule.ports.map((port, index) => (
+								<Badge
+									key={index}
+									variant='secondary'>
+									{port}
+									<Button
+										variant='ghost'
+										size='sm'
+										className='ml-2 h-4 w-4 p-0'
+										onClick={() =>
+											setRule((prev) => ({
+												...prev,
+												ports: prev.ports.filter((_, i) => i !== index),
+											}))
+										}>
+										<X className='h-3 w-3' />
+									</Button>
+								</Badge>
+							))}
+						</div>
 					</TabsContent>
 
 					<TabsContent
@@ -187,17 +319,16 @@ export function AddRuleDialog({
 						className='space-y-4'>
 						<Input
 							placeholder='Rule name'
-							value={formData.rules[0]?.rule_name ?? ""}
+							value={rule.rule_name}
 							onChange={(e) => handleInputChange("rule_name", e.target.value)}
 						/>
 						<Textarea
 							placeholder='Rule description'
-							value={formData.rules[0]?.rule_description ?? ""}
-							onChange={(e) =>
-								handleInputChange("rule_description", e.target.value)
-							}
+							value={rule.description}
+							onChange={(e) => handleInputChange("description", e.target.value)}
 						/>
 						<Select
+							value={rule.direction}
 							onValueChange={(value) =>
 								handleInputChange("direction", value as "inbound" | "outbound")
 							}>
@@ -210,6 +341,7 @@ export function AddRuleDialog({
 							</SelectContent>
 						</Select>
 						<Select
+							value={rule.action}
 							onValueChange={(value) =>
 								handleInputChange("action", value as "allow" | "deny")
 							}>
