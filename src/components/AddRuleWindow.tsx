@@ -236,6 +236,11 @@ export function AddRuleDialog({ open, onOpenChange }: AddRuleDialogProps) {
 								</Badge>
 							))}
 						</div>
+						{/* <Input
+							placeholder='Application path'
+							value={formData.rules[0]?.app_path ?? ""}
+							onChange={(e) => handleInputChange("app_path", e.target.value)}
+						/> */}
 					</TabsContent>
 
 					<TabsContent
