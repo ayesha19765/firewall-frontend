@@ -125,42 +125,40 @@ export function AddRuleDialog({ open, onOpenChange }: AddRuleDialogProps) {
 		const selectedClients = clientData.filter((client) =>
 			rule.hosts.includes(client.clientID)
 		);
-		return selectedClients.reduce((common, client) => {
+		const filteredApps = selectedClients.reduce((common, client) => {
 			if (common.length === 0) return client.application_data;
 			return common.filter((app) =>
 				client.application_data.some((clientApp) => clientApp.name === app.name)
 			);
 		}, []);
+		return filteredApps.filter((app) => app.name !== null);
 	}, [rule.hosts, clientData]);
 
 	return (
-		<Dialog
-			open={open}
-			onOpenChange={onOpenChange}>
+		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogTrigger asChild>
-				<Button variant='outline'>+ Add Rule</Button>
+				<Button variant="outline">+ Add Rule</Button>
 			</DialogTrigger>
-			<DialogContent className='sm:max-w-[500px]'>
+			<DialogContent className="sm:max-w-[500px]">
 				<DialogHeader>
 					<DialogTitle>Add New Rule</DialogTitle>
 				</DialogHeader>
 				<Tabs
 					value={currentTab}
 					onValueChange={setCurrentTab}
-					className='w-full'>
-					<TabsList className='grid w-full grid-cols-5'>
-						<TabsTrigger value='host'>Host</TabsTrigger>
-						<TabsTrigger value='application'>Application</TabsTrigger>
-						<TabsTrigger value='domain'>Domain</TabsTrigger>
-						<TabsTrigger value='ports'>Ports</TabsTrigger>
-						<TabsTrigger value='rest'>Rest</TabsTrigger>
+					className="w-full"
+				>
+					<TabsList className="grid w-full grid-cols-5">
+						<TabsTrigger value="host">Host</TabsTrigger>
+						<TabsTrigger value="application">Application</TabsTrigger>
+						<TabsTrigger value="domain">Domain</TabsTrigger>
+						<TabsTrigger value="ports">Ports</TabsTrigger>
+						<TabsTrigger value="rest">Rest</TabsTrigger>
 					</TabsList>
 
-					<TabsContent
-						value='host'
-						className='space-y-4'>
+					<TabsContent value="host" className="space-y-4">
 						<Input
-							placeholder='Search hosts'
+							placeholder="Search hosts"
 							value={searchTerm}
 							onChange={(e) => setSearchTerm(e.target.value)}
 						/>
@@ -168,7 +166,8 @@ export function AddRuleDialog({ open, onOpenChange }: AddRuleDialogProps) {
 							{filteredHosts.map((client) => (
 								<div
 									key={client.clientID}
-									className='flex items-center space-x-2 space-y-2'>
+									className="flex items-center space-x-2 space-y-2"
+								>
 									<Checkbox
 										checked={rule.hosts.includes(client.clientID)}
 										onCheckedChange={(checked) => {
@@ -189,9 +188,7 @@ export function AddRuleDialog({ open, onOpenChange }: AddRuleDialogProps) {
 						</div>
 					</TabsContent>
 
-					<TabsContent
-						value='application'
-						className='space-y-4'>
+					<TabsContent value="application" className="space-y-4">
 						<Select
 							onValueChange={(value) => {
 								const [name, path] = value.split("|");
@@ -199,30 +196,27 @@ export function AddRuleDialog({ open, onOpenChange }: AddRuleDialogProps) {
 									...prev,
 									application: [...prev.application, { name, path }],
 								}));
-							}}>
+							}}
+						>
 							<SelectTrigger>
-								<SelectValue placeholder='Select application' />
+								<SelectValue placeholder="Select application" />
 							</SelectTrigger>
 							<SelectContent>
 								{commonApps.map((app, index) => (
-									<SelectItem
-										key={index}
-										value={`${app.name}|${app.path}`}>
+									<SelectItem key={index} value={`${app.name}|${app.path}`}>
 										{app.name}
 									</SelectItem>
 								))}
 							</SelectContent>
 						</Select>
-						<div className='flex flex-wrap gap-2'>
+						<div className="flex flex-wrap gap-2">
 							{rule.application.map((app, index) => (
-								<Badge
-									key={index}
-									variant='secondary'>
+								<Badge key={index} variant="secondary">
 									{app.name}
 									<Button
-										variant='ghost'
-										size='sm'
-										className='ml-2 h-4 w-4 p-0'
+										variant="ghost"
+										size="sm"
+										className="ml-2 h-4 w-4 p-0"
 										onClick={() =>
 											setRule((prev) => ({
 												...prev,
@@ -230,8 +224,9 @@ export function AddRuleDialog({ open, onOpenChange }: AddRuleDialogProps) {
 													(_, i) => i !== index
 												),
 											}))
-										}>
-										<X className='h-3 w-3' />
+										}
+									>
+										<X className="h-3 w-3" />
 									</Button>
 								</Badge>
 							))}
@@ -243,11 +238,9 @@ export function AddRuleDialog({ open, onOpenChange }: AddRuleDialogProps) {
 						/> */}
 					</TabsContent>
 
-					<TabsContent
-						value='domain'
-						className='space-y-4'>
+					<TabsContent value="domain" className="space-y-4">
 						<Input
-							placeholder='Enter domains (comma-separated)'
+							placeholder="Enter domains (comma-separated)"
 							value={rule.domain.join(", ")}
 							onChange={(e) =>
 								handleInputChange(
@@ -259,44 +252,42 @@ export function AddRuleDialog({ open, onOpenChange }: AddRuleDialogProps) {
 						<Select
 							onValueChange={(value) =>
 								console.log("Selected category:", value)
-							}>
+							}
+						>
 							<SelectTrigger>
-								<SelectValue placeholder='Select domain category' />
+								<SelectValue placeholder="Select domain category" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value='business'>Business</SelectItem>
-								<SelectItem value='personal'>Personal</SelectItem>
-								<SelectItem value='social'>Social</SelectItem>
+								<SelectItem value="business">Business</SelectItem>
+								<SelectItem value="personal">Personal</SelectItem>
+								<SelectItem value="social">Social</SelectItem>
 							</SelectContent>
 						</Select>
-						<div className='flex flex-wrap gap-2'>
+						<div className="flex flex-wrap gap-2">
 							{rule.domain.map((domain, index) => (
-								<Badge
-									key={index}
-									variant='secondary'>
+								<Badge key={index} variant="secondary">
 									{domain}
 									<Button
-										variant='ghost'
-										size='sm'
-										className='ml-2 h-4 w-4 p-0'
+										variant="ghost"
+										size="sm"
+										className="ml-2 h-4 w-4 p-0"
 										onClick={() =>
 											setRule((prev) => ({
 												...prev,
 												domain: prev.domain.filter((_, i) => i !== index),
 											}))
-										}>
-										<X className='h-3 w-3' />
+										}
+									>
+										<X className="h-3 w-3" />
 									</Button>
 								</Badge>
 							))}
 						</div>
 					</TabsContent>
 
-					<TabsContent
-						value='ports'
-						className='space-y-4'>
+					<TabsContent value="ports" className="space-y-4">
 						<Input
-							placeholder='Enter ports (comma-separated)'
+							placeholder="Enter ports (comma-separated)"
 							value={rule.ports.join(", ")}
 							onChange={(e) =>
 								handleInputChange(
@@ -308,39 +299,36 @@ export function AddRuleDialog({ open, onOpenChange }: AddRuleDialogProps) {
 								)
 							}
 						/>
-						<div className='flex flex-wrap gap-2'>
+						<div className="flex flex-wrap gap-2">
 							{rule.ports.map((port, index) => (
-								<Badge
-									key={index}
-									variant='secondary'>
+								<Badge key={index} variant="secondary">
 									{port}
 									<Button
-										variant='ghost'
-										size='sm'
-										className='ml-2 h-4 w-4 p-0'
+										variant="ghost"
+										size="sm"
+										className="ml-2 h-4 w-4 p-0"
 										onClick={() =>
 											setRule((prev) => ({
 												...prev,
 												ports: prev.ports.filter((_, i) => i !== index),
 											}))
-										}>
-										<X className='h-3 w-3' />
+										}
+									>
+										<X className="h-3 w-3" />
 									</Button>
 								</Badge>
 							))}
 						</div>
 					</TabsContent>
 
-					<TabsContent
-						value='rest'
-						className='space-y-4'>
+					<TabsContent value="rest" className="space-y-4">
 						<Input
-							placeholder='Rule name'
+							placeholder="Rule name"
 							value={rule.rule_name}
 							onChange={(e) => handleInputChange("rule_name", e.target.value)}
 						/>
 						<Textarea
-							placeholder='Rule description'
+							placeholder="Rule description"
 							value={rule.description}
 							onChange={(e) => handleInputChange("description", e.target.value)}
 						/>
@@ -348,31 +336,33 @@ export function AddRuleDialog({ open, onOpenChange }: AddRuleDialogProps) {
 							value={rule.direction}
 							onValueChange={(value) =>
 								handleInputChange("direction", value as "inbound" | "outbound")
-							}>
+							}
+						>
 							<SelectTrigger>
-								<SelectValue placeholder='Select direction' />
+								<SelectValue placeholder="Select direction" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value='inbound'>Inbound</SelectItem>
-								<SelectItem value='outbound'>Outbound</SelectItem>
+								<SelectItem value="inbound">Inbound</SelectItem>
+								<SelectItem value="outbound">Outbound</SelectItem>
 							</SelectContent>
 						</Select>
 						<Select
 							value={rule.action}
 							onValueChange={(value) =>
 								handleInputChange("action", value as "allow" | "block")
-							}>
+							}
+						>
 							<SelectTrigger>
-								<SelectValue placeholder='Select action' />
+								<SelectValue placeholder="Select action" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value='allow'>Allow</SelectItem>
-								<SelectItem value='block'>Deny</SelectItem>
+								<SelectItem value="allow">Allow</SelectItem>
+								<SelectItem value="block">Deny</SelectItem>
 							</SelectContent>
 						</Select>
 					</TabsContent>
 				</Tabs>
-				<div className='flex justify-between mt-4'>
+				<div className="flex justify-between mt-4">
 					{currentTab !== "rest" ? (
 						<Button onClick={handleNext}>Next</Button>
 					) : (
